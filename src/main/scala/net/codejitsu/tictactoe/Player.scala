@@ -6,10 +6,10 @@ object PlayerType extends Enumeration {
 }
 import PlayerType._
 
-class Player {
+class Player(val name: String, playerType: PlayerType) {
 
 }
 
 object Player {
-  def apply(name: String, t: PlayerType) = new Player()
+  def apply(name: String, playerType: PlayerType) = new Player(name, playerType)
 }
