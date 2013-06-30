@@ -7,6 +7,8 @@ class Game(private val playerX: Player, private val playerO: Player) {
 	require(playerX.name != playerO.name)
 	require(playerX.playerType != playerO.playerType)
 	
+	private val field: Field = Field()
+	
 	def getPlayer(ptype: PlayerType): Player = if (ptype == PlayerType.X) this.playerX else playerO
 }
 

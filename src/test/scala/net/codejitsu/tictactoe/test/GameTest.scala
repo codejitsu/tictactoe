@@ -1,9 +1,9 @@
+
+
 package net.codejitsu.tictactoe.test
 
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
-
 import net.codejitsu.tictactoe.Game
 import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.PlayerType
