@@ -6,7 +6,7 @@ object PlayerType extends Enumeration {
 }
 import PlayerType._
 
-class Player(val name: String, playerType: PlayerType) {
+class Player(val name: String, val playerType: PlayerType) {
 
 }
 

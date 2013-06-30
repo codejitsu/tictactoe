@@ -1,7 +1,9 @@
 package net.codejitsu.tictactoe
 
-class Game(val playerX: Player, val playerO: Player) {
+import net.codejitsu.tictactoe.PlayerType._
 
+class Game(private val playerX: Player, private val playerO: Player) {
+	def getPlayer(ptype: PlayerType): Player = if (ptype == PlayerType.X) this.playerX else playerO
 }
 
 object Game {
