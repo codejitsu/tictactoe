@@ -1,10 +1,18 @@
 package net.codejitsu.tictactoe
 
-import scala.util.Either
-import net.codejitsu.tictactoe.PlayerType._
+object CellStatus extends Enumeration {
+  type CellStatus = Value
+  val OccupiedByX, OccupiedByO, EmptyCell = Value
+}
+import CellStatus._
 
 class Field {
-	private val field: Seq[Either[PlayerType, Null]] = List(null, null, null, null, null, null, null, null, null)
+	private val field: Seq[CellStatus] = 
+	  List(EmptyCell, EmptyCell, EmptyCell, 
+	       EmptyCell, EmptyCell, EmptyCell, 
+	       EmptyCell, EmptyCell, EmptyCell)
+	
+	def isEmpty = field.forall(_ == EmptyCell)
 }
 
 object Field {
