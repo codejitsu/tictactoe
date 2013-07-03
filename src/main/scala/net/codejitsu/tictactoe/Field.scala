@@ -1,21 +1,22 @@
 package net.codejitsu.tictactoe
 
+import PlayerType._
+
 object CellStatus extends Enumeration {
   type CellStatus = Value
-  val OccupiedByX, OccupiedByO, EmptyCell = Value
+  val OccupiedByX, OccupiedByO = Value
 }
 import CellStatus._
 
-case class Field(val field: Seq[CellStatus]) {
-  def isEmpty = field.forall(_ == EmptyCell)
+case class Field(val field: List[(CellStatus, Int, Int)]) {
+  def isEmpty = field.isEmpty
 
-  def update(move: Move): Field = {
-    this.copy(field = field.updated(2, OccupiedByX))
+  def update(move: Move): Field = move.player.playerType match {    
+    case X => this.copy(field = (OccupiedByX, move.row, move.col) :: field)
+    case O => this.copy(field = (OccupiedByO, move.row, move.col) :: field)
   }
 }
 
 object Field {
-  def apply() = new Field(List(EmptyCell, EmptyCell, EmptyCell,
-    EmptyCell, EmptyCell, EmptyCell,
-    EmptyCell, EmptyCell, EmptyCell))
+  def apply() = new Field(List())
 }

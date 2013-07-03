@@ -13,7 +13,7 @@ class Player(val name: String, val playerType: PlayerType, val strategy: PlayStr
 	require(strategy != null)
 	
 	def makeMove(field: Field): Move = {
-	  strategy.makeMove(field)
+	  strategy.makeMove(field, this)
 	}
 }
 
