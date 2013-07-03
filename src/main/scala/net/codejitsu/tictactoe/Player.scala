@@ -6,7 +6,7 @@ object PlayerType extends Enumeration {
 }
 import PlayerType._
 
-class Player(val name: String, val playerType: PlayerType, val strategy: PlayStrategy) {
+case class Player(val name: String, val playerType: PlayerType, val strategy: PlayStrategy) {
 	require(name != null)
 	require(!name.trim().isEmpty())
 	require(playerType != null)
@@ -15,8 +15,4 @@ class Player(val name: String, val playerType: PlayerType, val strategy: PlayStr
 	def makeMove(field: Field): Move = {
 	  strategy.makeMove(field, this)
 	}
-}
-
-object Player {
-  def apply(name: String, playerType: PlayerType, strategy: PlayStrategy) = new Player(name, playerType, strategy)
 }
