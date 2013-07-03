@@ -6,15 +6,16 @@ object CellStatus extends Enumeration {
 }
 import CellStatus._
 
-class Field {
-	private val field: Seq[CellStatus] = 
-	  List(EmptyCell, EmptyCell, EmptyCell, 
-	       EmptyCell, EmptyCell, EmptyCell, 
-	       EmptyCell, EmptyCell, EmptyCell)
-	
-	def isEmpty = field.forall(_ == EmptyCell)
+case class Field(val field: Seq[CellStatus]) {
+  def isEmpty = field.forall(_ == EmptyCell)
+
+  def update(move: Move): Field = {
+    this.copy(field = field.updated(2, OccupiedByX))
+  }
 }
 
 object Field {
-  def apply() = new Field
+  def apply() = new Field(List(EmptyCell, EmptyCell, EmptyCell,
+    EmptyCell, EmptyCell, EmptyCell,
+    EmptyCell, EmptyCell, EmptyCell))
 }

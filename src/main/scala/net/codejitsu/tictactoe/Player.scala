@@ -11,6 +11,10 @@ class Player(val name: String, val playerType: PlayerType, val strategy: PlayStr
 	require(!name.trim().isEmpty())
 	require(playerType != null)
 	require(strategy != null)
+	
+	def makeMove(field: Field): Move = {
+	  strategy.makeMove(field)
+	}
 }
 
 object Player {
