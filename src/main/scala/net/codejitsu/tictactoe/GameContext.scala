@@ -54,4 +54,12 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
     (safeMove(field),
       context.copy(status = Playing, currentPlayer = context.nextPlayer))
   }
+  
+  def statusString: String = status match {
+    case NotStarted => "Not started yet."
+    case Playing => "Playing"
+    case XWon => "X won!" 
+    case OWon => "O won!" 
+    case Tie => "Tie!"
+  }
 }
