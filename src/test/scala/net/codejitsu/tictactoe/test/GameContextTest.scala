@@ -58,7 +58,7 @@ class GameControllerTest {
     val field8 = field7.update(Move(2, 2, playerTwo))
     val field9 = field8.update(Move(2, 1, playerOne))
 
-    val tie = context._2.move(field9, context._2)
+    val tie = context._2.move(field9)
 
     assertTrue(tie._1.isFull)
     assertTrue(tie._2.status == Tie)
@@ -77,28 +77,28 @@ class GameControllerTest {
       val step1 = context.start()
       checkCurrentPlayer(step1._2, O)
 
-      val step2 = step1._2.move(step1._1, step1._2)
+      val step2 = step1._2.move(step1._1)
       checkCurrentPlayer(step2._2, X)
 
-      val step3 = step2._2.move(step2._1, step2._2)
+      val step3 = step2._2.move(step2._1)
       checkCurrentPlayer(step3._2, O)
 
-      val step4 = step3._2.move(step3._1, step3._2)
+      val step4 = step3._2.move(step3._1)
       checkCurrentPlayer(step4._2, X)
 
-      val step5 = step4._2.move(step4._1, step4._2)
+      val step5 = step4._2.move(step4._1)
       checkCurrentPlayer(step5._2, O)
 
-      val step6 = step5._2.move(step5._1, step5._2)
+      val step6 = step5._2.move(step5._1)
       checkCurrentPlayer(step6._2, X)
 
-      val step7 = step6._2.move(step6._1, step6._2)
+      val step7 = step6._2.move(step6._1)
       checkCurrentPlayer(step7._2, O)
 
-      val step8 = step7._2.move(step7._1, step7._2)
+      val step8 = step7._2.move(step7._1)
       checkCurrentPlayer(step8._2, X)
 
-      val step9 = step8._2.move(step8._1, step8._2)
+      val step9 = step8._2.move(step8._1)
       checkCurrentPlayer(step9._2, O)
     } catch {
       case is: IllegalStateException =>
@@ -127,7 +127,7 @@ class GameControllerTest {
 
     val field5 = field4.update(Move(0, 2, playerOne))
 
-    val gameOverXWon = context._2.move(field5, context._2)
+    val gameOverXWon = context._2.move(field5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -146,7 +146,7 @@ class GameControllerTest {
     val field4 = field3.update(Move(2, 2, playerTwo))
     val field5 = field4.update(Move(2, 0, playerOne))
 
-    val gameOverXWon = context._2.move(field5, context._2)
+    val gameOverXWon = context._2.move(field5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -165,7 +165,7 @@ class GameControllerTest {
     val field4 = field3.update(Move(0, 1, playerTwo))
     val field5 = field4.update(Move(2, 2, playerOne))
 
-    val gameOverXWon = context._2.move(field5, context._2)
+    val gameOverXWon = context._2.move(field5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -184,7 +184,7 @@ class GameControllerTest {
     val field4 = field3.update(Move(0, 1, playerTwo))
     val field5 = field4.update(Move(2, 0, playerOne))
 
-    val gameOverXWon = context._2.move(field5, context._2)
+    val gameOverXWon = context._2.move(field5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -207,7 +207,7 @@ class GameControllerTest {
     val field8 = field7.update(Move(2, 2, playerTwo))
     val field9 = field8.update(Move(2, 1, playerOne))
 
-    val tie = context._2.move(field9, context._2)
+    val tie = context._2.move(field9)
 
     assertEquals(Tie, tie._2.status)
   }

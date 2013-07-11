@@ -16,7 +16,7 @@ object TicTacToeConsole extends App {
       if (context.currentPlayer == playerOne.playerType) println(field.toString)
       
       if (context.status == Playing) {
-        val step = context.move(field, context)
+        val step = context.move(field)
         contexts(step._1, step._2)
       } else {
         println("Game over: " + context.statusString)

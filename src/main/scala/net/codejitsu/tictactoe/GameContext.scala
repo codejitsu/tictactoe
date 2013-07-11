@@ -24,24 +24,24 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   def start(): (Field, GameContext) = {
     if (status != NotStarted) throw new IllegalStateException
 
-    move(Field(), this.copy(status = Playing, currentPlayer = currentPlayer))
+    this.copy(status = Playing, currentPlayer = currentPlayer).move(Field())
   }
 
-  def move(field: Field, context: GameContext): (Field, GameContext) = {
-    if (context.status == GameStatus.OWon || context.status == GameStatus.XWon || context.status == GameStatus.Tie) {
+  def move(field: Field): (Field, GameContext) = {
+    if (this.status == GameStatus.OWon || this.status == GameStatus.XWon || this.status == GameStatus.Tie) {
       throw new IllegalStateException
     }
 
     val gameStatus = game.calculateStatus(field)
 
     if (gameStatus != GameStatus.Playing) {
-      (field, context.copy(status = gameStatus))
+      (field, this.copy(status = gameStatus))
     } else {
       try {
-        triggerMove(field, context)
+        triggerMove(field, this)
       } catch {
         case goe: GameOverException => {
-          (field, context.copy(status = game.calculateStatus(field)))
+          (field, this.copy(status = game.calculateStatus(field)))
         }
       }
     }
