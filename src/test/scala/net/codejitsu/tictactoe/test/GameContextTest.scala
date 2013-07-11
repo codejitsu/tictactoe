@@ -10,13 +10,14 @@ import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.Move
 import net.codejitsu.tictactoe.GameContext
+import net.codejitsu.tictactoe.PlayStrategy
 
 class GameControllerTest {
   @Test def initGameController() {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted)
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ())
 
     assertEquals(NotStarted, context.status)
     assertEquals(O, context.nextPlayer)
@@ -32,7 +33,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted)
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ())
 
     assertEquals(NotStarted, context.status)
 
@@ -45,7 +46,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
     val field1 = field.update(Move(0, 0, playerOne))
@@ -64,12 +65,26 @@ class GameControllerTest {
     assertTrue(tie._2.status == Tie)
   }
 
+  @Test(expected = classOf[ArithmeticException])
+  def onErrorCalled() {
+    val playerOne = Player("Player 1", X, new PlayStrategy {
+      def makeMove(field: Field, player: Player): Move = Move(0, 0, player)
+    })
+    
+    val playerTwo = Player("Player 2", O, new PlayStrategy {
+      def makeMove(field: Field, player: Player): Move = Move(0, 0, player)
+    })
+
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start()
+    context._2.move(context._1)
+  }  
+  
   @Test
   def playersSwitchedCorrectly() {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted)
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ())
 
     assertEquals(X, context.currentPlayer)
 
@@ -113,7 +128,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
 
@@ -137,7 +152,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
     val field1 = field.update(Move(0, 0, playerOne))
@@ -156,7 +171,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
     val field1 = field.update(Move(0, 0, playerOne))
@@ -175,7 +190,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
     val field1 = field.update(Move(0, 2, playerOne))
@@ -194,7 +209,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
     val field1 = field.update(Move(0, 0, playerOne))

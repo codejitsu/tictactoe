@@ -20,7 +20,7 @@ case class Field(val field: List[(CellStatus, Int, Int)]) {
 
   def verify(move: Move): Boolean = {
     if (!field.exists(c => c._2 == move.row && c._3 == move.col)) true
-    else throw new IllegalStateException
+    else throw new IllegalStateException()
   }
 
   def verify(x: Int) = {

@@ -5,7 +5,8 @@ import scala.annotation.tailrec
 import GameStatus._
 import net.codejitsu.tictactoe.PlayerType._
 
-case class GameContext(val playerX: Player, val playerO: Player, val currentPlayer: PlayerType, val status: GameStatus) {
+case class GameContext(val playerX: Player, val playerO: Player, val currentPlayer: PlayerType, val status: GameStatus,
+    onError: Unit => Unit) {
   val game = Game(playerX, playerO)
 
   def nextPlayer = currentPlayer match {
@@ -16,7 +17,10 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   @tailrec
   private def safeMove(field: Field): Field = {
     game.makeMove(currentPlayer, field) match {
-      case (_, false) => safeMove(field)
+      case (_, false) => {
+        onError()
+        safeMove(field)
+      }
       case (f, true) => f
     }
   }
