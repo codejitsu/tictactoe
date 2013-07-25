@@ -34,12 +34,12 @@ class GameTreeTest {
 	}
 
 	@Test
-	def zeroElementHasXasNextPlayer() {
+	def zeroElementHasOasNextPlayer() {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
 	    case Leaf => fail()
-	    case Node(e, ch, p) => assertTrue(p == PlayerType.X)
+	    case Node(e, ch, p) => assertTrue(p == PlayerType.O)
 	  }
 	}	
 	
@@ -110,11 +110,46 @@ class GameTreeTest {
 	    }
 	  }
 	}
+
+	@Test
+	def secondLevelContainsAllCorrectMoves() {
+	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
+	  val secondLevel = GameTree.build(firstLevel, 1, 3)
+
+	  secondLevel match {
+	    case Leaf => fail()
+	    case Node(e, ch, p) => {
+	    	ch.foreach(c => c match {
+	    	  case Leaf => fail()
+	    	  case Node(e2, ch2, p2) => {
+	    		  assertTrue(!ch2.isEmpty)
+	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
+	    		  
+	    		  val allMoves = generateAllMoves2Level(e2.getOrElse(Field())).map(_.toString)
+	    		  
+	    		  ch2.forall(
+	    		    c => allMoves.contains(c.toString) 
+	    		  )
+	    	  }
+	    	})	      
+	    }
+	  }
+	}
+	
 	
 	@Test
 	def generateCompleteTree() {
 	  val tree = buildTree(GameTree.start, 1, 9)
 	 // GameTree.printLevel(tree, 0, 2)
+	}
+	
+	def generateAllMoves2Level(field: Field): List[Field] = {
+	  val xmove = field.field(0)
+	  
+	  val player = Player("Player", PlayerType.O, new RandomMoveStrategy)
+	  val moves =  List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
+	  
+	  moves.filter(m => m._1 != xmove._2 && m._2 != xmove._3).map(m => field.update(Move(m._1, m._2, player)))	  
 	}
 	
 	def buildTree(tree: GameTree[Field], level: Int, upToLevel: Int): GameTree[Field] = {

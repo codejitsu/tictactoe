@@ -30,7 +30,7 @@ case class Node[T](e: Option[T], children: List[GameTree[T]], nextPlayer: Player
 
 object GameTree {
   def start: GameTree[Field] = {
-    Node[Field](Option(Field()), List[GameTree[Field]](), PlayerType.X)
+    Node[Field](Option(Field()), List[GameTree[Field]](), PlayerType.O)
   }
 
   def build(tree: GameTree[Field], level: Int, upToLevel: Int): GameTree[Field] = {
@@ -66,18 +66,19 @@ object GameTree {
   def collectFields(parentField: Field, player: Player,
     hash: HashSet[String], acc: List[Field], total: Int, moves: List[(Int, Int)]): List[Field] = moves match {
     case Nil => acc
-    case x :: tail =>
-      try {
-        val nextField = parentField.update(Move(x._1, x._2, player))
+    case x :: tail => {
+      val move = Move(x._1, x._2, player)
+
+      if (parentField.silentVerify(move)) {
+        val nextField = parentField.update(move)
 
         if (!hash.contains(nextField.toString)) {
           collectFields(parentField, player, hash + nextField.toString, nextField :: acc, total - 1, tail)
         } else {
           collectFields(parentField, player, hash, acc, total - 1, tail)
         }
-      } catch {
-        case ise: IllegalStateException => collectFields(parentField, player, hash, acc, total - 1, tail)
-      }
+      } else collectFields(parentField, player, hash, acc, total - 1, tail)
+    }
   }
 
   def nextPlayer(player: PlayerType) = {

@@ -23,6 +23,11 @@ case class Field(val field: List[(CellStatus, Int, Int)]) {
     else throw new IllegalStateException()
   }
 
+  def silentVerify(move: Move): Boolean = {
+    if (!field.exists(c => c._2 == move.row && c._3 == move.col)) true
+    else false    
+  }
+  
   def verify(x: Int) = {
     if (x > FieldSize - 1 || x < 0) throw new IllegalArgumentException
   }
