@@ -8,6 +8,7 @@ import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.Leaf
 import net.codejitsu.tictactoe.Node
 import net.codejitsu.tictactoe._
+import net.codejitsu.tictactoe.PlayerType._
 
 class GameTreeTest {
 	@Test
@@ -26,10 +27,7 @@ class GameTreeTest {
 	  
 	  zeroLevel match {
 	    case Leaf => fail()
-	    case Node(e, ch, p) => e match {
-	      case Some(x) => assertTrue(x.isEmpty)
-	      case _ => fail()
-	    }
+	    case Node(e, _, _) => assertTrue(e.isEmpty)
 	  }
 	}
 
@@ -125,7 +123,7 @@ class GameTreeTest {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
 	    		  
-	    		  val allMoves = generateAllMoves2Level(e2.getOrElse(Field())).map(_.toString)
+	    		  val allMoves = generateAllMoves2Level(e2).map(_.toString)
 	    		  
 	    		  ch2.forall(
 	    		    c => allMoves.contains(c.toString) 
@@ -136,11 +134,43 @@ class GameTreeTest {
 	  }
 	}
 	
-	
 	@Test
 	def generateCompleteTree() {
 	  val tree = buildTree(GameTree.start, 1, 9)
-	 // GameTree.printLevel(tree, 0, 2)
+	}
+	
+	@Test
+	def testAdviceXWonOrTie() {
+	  val tree = buildTree(GameTree.start, 1, 9)
+	  val moves = generateWinPath(tree, PlayerType.X)
+	  
+	  assertTrue(moves.moves.size > 5)
+	  
+	  val game = Game(Player("X", PlayerType.X, new RandomMoveStrategy()), 
+	      Player("O", PlayerType.O, new RandomMoveStrategy()))
+	  
+	  val status = game.calculateStatus(moves.moves.last)
+
+	  assertTrue(status == GameStatus.XWon || status == GameStatus.Tie)
+	}
+
+	@Test
+	def testAdviceOWonOrTie() {
+	  val tree = buildTree(GameTree.start, 1, 9)
+	  val moves = generateWinPath(tree, PlayerType.O)
+	  
+	  assertTrue(moves.moves.size > 5)
+
+	  val game = Game(Player("X", PlayerType.X, new RandomMoveStrategy()), 
+	      Player("O", PlayerType.O, new RandomMoveStrategy()))
+	  
+	  val status = game.calculateStatus(moves.moves.last)
+
+	  assertTrue(status == GameStatus.OWon || status == GameStatus.Tie)
+	}	
+	
+	def generateWinPath(start: GameTree[Field], playerToWin: PlayerType): MovePath = {
+	  GameTree.advice(start, playerToWin)
 	}
 	
 	def generateAllMoves2Level(field: Field): List[Field] = {
