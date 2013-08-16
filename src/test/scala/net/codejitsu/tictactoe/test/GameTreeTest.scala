@@ -16,8 +16,8 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Leaf => fail()
 	    case Node(e, ch, p) => assertTrue(ch.isEmpty)
+	    case _ => fail()
 	  }
 	}
 	
@@ -26,18 +26,18 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Leaf => fail()
 	    case Node(e, _, _) => assertTrue(e.isEmpty)
+	    case _ => fail()
 	  }
 	}
 
 	@Test
-	def zeroElementHasOasNextPlayer() {
+	def zeroElementHasXasNextPlayer() {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Leaf => fail()
-	    case Node(e, ch, p) => assertTrue(p == PlayerType.O)
+	    case Node(_, _, p) => assertTrue(p == X)
+	    case _ => fail()
 	  }
 	}	
 	
@@ -74,7 +74,7 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
 	  
 	  val fieldInit = Field()
-	  val player = Player("Player", PlayerType.X, new RandomMoveStrategy)
+	  val player = Player("Player", X, new RandomMoveStrategy)
 	  val moves =  List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
 	  
 	  val allFields = moves.map(m => fieldInit.update(Move(m._1, m._2, player))).map(_.toString)
@@ -142,14 +142,14 @@ class GameTreeTest {
 	@Test
 	def testAdviceXWonOrTie() {
 	  val tree = buildTree(GameTree.start, 1, 9)
-	  val moves = generateWinPath(tree, PlayerType.X)
+	  val path = generateWinPath(tree, X)
 	  
-	  assertTrue(moves.moves.size > 5)
+	  assertTrue(path.moves.size > 5)
 	  
-	  val game = Game(Player("X", PlayerType.X, new RandomMoveStrategy()), 
-	      Player("O", PlayerType.O, new RandomMoveStrategy()))
+	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
+	      Player("O", O, new RandomMoveStrategy()))
 	  
-	  val status = game.calculateStatus(moves.moves.last)
+	  val status = game.calculateStatus(path.moves.last)
 
 	  assertTrue(status == GameStatus.XWon || status == GameStatus.Tie)
 	}
@@ -157,12 +157,12 @@ class GameTreeTest {
 	@Test
 	def testAdviceOWonOrTie() {
 	  val tree = buildTree(GameTree.start, 1, 9)
-	  val moves = generateWinPath(tree, PlayerType.O)
+	  val moves = generateWinPath(tree, O)
 	  
 	  assertTrue(moves.moves.size > 5)
 
-	  val game = Game(Player("X", PlayerType.X, new RandomMoveStrategy()), 
-	      Player("O", PlayerType.O, new RandomMoveStrategy()))
+	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
+	      Player("O", O, new RandomMoveStrategy()))
 	  
 	  val status = game.calculateStatus(moves.moves.last)
 
@@ -176,7 +176,7 @@ class GameTreeTest {
 	def generateAllMoves2Level(field: Field): List[Field] = {
 	  val xmove = field.field(0)
 	  
-	  val player = Player("Player", PlayerType.O, new RandomMoveStrategy)
+	  val player = Player("Player", O, new RandomMoveStrategy)
 	  val moves =  List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
 	  
 	  moves.filter(m => m._1 != xmove._2 && m._2 != xmove._3).map(m => field.update(Move(m._1, m._2, player)))	  

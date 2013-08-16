@@ -31,9 +31,7 @@ object GameTree {
   
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
     
-  def start: GameTree = {
-    Node(Field(), List[GameTree](), PlayerType.O)
-  }
+  val start = Node(Field(), List[GameTree](), PlayerType.X)
 
   def findWinOrTiePathsFrom(acc: List[MovePath], current: MovePath, 
       start: GameTree, playerToWin: PlayerType): List[MovePath] = start match {
@@ -70,14 +68,14 @@ object GameTree {
   }
 
   private def isGameOver(status: GameStatus) = 
-    status == GameStatus.OWon || status == GameStatus.XWon || status == GameStatus.Tie
+    status == OWon || status == XWon || status == Tie
   
   def build(tree: GameTree, level: Int, upToLevel: Int): GameTree = {
     if (upToLevel == 0) Leaf
     else if (level == upToLevel) tree
     else {
       tree match {
-        case Node(e, ch, p) => {
+        case Node(e, _, p) => {
           val status = this.game.calculateStatus(e)    
               
           if (this.isGameOver(status)) {
@@ -89,9 +87,9 @@ object GameTree {
 
             val fields = collectFields(e, player, List.empty[Field], this.all_moves)
 
-            val children = fields.map(f => Node(f, List[GameTree](), nextPlayer(p)))
+            val children = fields.map(Node(_, List[GameTree](), nextPlayer(p)))
 
-            Node(e, children.map(build(_, level + 1, upToLevel)), nextPlayer(p))
+            Node(e, children.map(build(_, level + 1, upToLevel)), p)
           }
         }
 
