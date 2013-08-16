@@ -169,7 +169,7 @@ class GameTreeTest {
 	  assertTrue(status == GameStatus.OWon || status == GameStatus.Tie)
 	}	
 	
-	def generateWinPath(start: GameTree[Field], playerToWin: PlayerType): MovePath = {
+	def generateWinPath(start: GameTree, playerToWin: PlayerType): MovePath = {
 	  GameTree.advice(start, playerToWin)
 	}
 	
@@ -182,7 +182,7 @@ class GameTreeTest {
 	  moves.filter(m => m._1 != xmove._2 && m._2 != xmove._3).map(m => field.update(Move(m._1, m._2, player)))	  
 	}
 	
-	def buildTree(tree: GameTree[Field], level: Int, upToLevel: Int): GameTree[Field] = {
+	def buildTree(tree: GameTree, level: Int, upToLevel: Int): GameTree = {
 	  if (level == upToLevel) tree
 	  else {
 	    buildTree(GameTree.build(tree, 1, level + 1), level + 1, upToLevel)

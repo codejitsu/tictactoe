@@ -5,36 +5,38 @@ import scala.collection.immutable.HashMap
 import scala.collection.immutable.HashSet
 import net.codejitsu.tictactoe.GameStatus._
 
-sealed trait GameTree[+T] {
+sealed trait GameTree {
   def nextPlayer: PlayerType
-  def toList: List[T]
+  def toList: List[Field]
   def mkString: String
 }
 
-case object Leaf extends GameTree[Nothing] {
+case object Leaf extends GameTree {
   def nextPlayer = null
   def toList = Nil
   def mkString = "-"
 }
 
-case class Node[T](e: T, children: List[GameTree[T]], nextPlayer: PlayerType) extends GameTree[T] {
-  def toList = e :: children.foldLeft(List[T]())(_ ::: _.toList)
+case class Node(e: Field, children: List[GameTree], nextPlayer: PlayerType) extends GameTree {
+  def toList = e :: children.foldLeft(List[Field]())(_ ::: _.toList)
 
-  def mkString = e match {
-    case Some(s) => "===" + "\n" + s.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
-    case _ => "===" + "\n" + "[]" + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
-  }
+  def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
 }
 
-case class MovePath(start: GameTree[Field], moves: List[Field], status: Option[GameStatus])
+case class MovePath(start: GameTree, moves: List[Field], status: Option[GameStatus])
 
 object GameTree {
-  def start: GameTree[Field] = {
-    Node[Field](Field(), List[GameTree[Field]](), PlayerType.O)
+  private val game = Game(Player("X", PlayerType.X, new RandomMoveStrategy),
+    Player("O", PlayerType.O, new RandomMoveStrategy))
+  
+  private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
+    
+  def start: GameTree = {
+    Node(Field(), List[GameTree](), PlayerType.O)
   }
 
   def findWinOrTiePathsFrom(acc: List[MovePath], current: MovePath, 
-      start: GameTree[Field], playerToWin: PlayerType): List[MovePath] = start match {
+      start: GameTree, playerToWin: PlayerType): List[MovePath] = start match {
     case Node(e, ch, p) => {
       ch.flatMap(c => findWinOrTiePathsFrom(acc, current.copy(moves = current.moves :+ e), c, playerToWin))
     }
@@ -57,7 +59,7 @@ object GameTree {
     }
   }
   
-  def advice(start: GameTree[Field], playerToWin: PlayerType) : MovePath = {
+  def advice(start: GameTree, playerToWin: PlayerType) : MovePath = {
 	val allWinTiePaths = findWinOrTiePathsFrom(List(), MovePath(start, List(), None), start, playerToWin)
     
 	val expectedStatus = if (playerToWin == PlayerType.X) GameStatus.XWon else GameStatus.OWon
@@ -66,36 +68,30 @@ object GameTree {
 	
     allWon.head
   }
+
+  private def isGameOver(status: GameStatus) = 
+    status == GameStatus.OWon || status == GameStatus.XWon || status == GameStatus.Tie
   
-  def build(tree: GameTree[Field], level: Int, upToLevel: Int): GameTree[Field] = {
+  def build(tree: GameTree, level: Int, upToLevel: Int): GameTree = {
     if (upToLevel == 0) Leaf
     else if (level == upToLevel) tree
     else {
       tree match {
         case Node(e, ch, p) => {
-          val parent = e
-
-          val game = Game(Player("X", PlayerType.X, new RandomMoveStrategy), 
-              Player("O", PlayerType.O, new RandomMoveStrategy))
-          
-          val status = game.calculateStatus(parent)    
+          val status = this.game.calculateStatus(e)    
               
-          if (status == GameStatus.OWon || status == GameStatus.XWon || status == GameStatus.Tie) {
-            Node[Field](e, List(Leaf), p)
+          if (this.isGameOver(status)) {
+            //TODO save game result in node
+            Node(e, List(Leaf), p)
           } else if (upToLevel == FieldSize * FieldSize) tree
           else {
-            val totalMoves = FieldSize * FieldSize - upToLevel
-
-            val parentField = e
-
             val player = Player("Player", p, new RandomMoveStrategy())
 
-            val fields = collectFields(parentField, player, HashSet.empty[String], List.empty[Field], totalMoves,
-              moves)
+            val fields = collectFields(e, player, List.empty[Field], this.all_moves)
 
-            val children = fields.map(f => Node[Field](f, List[GameTree[Field]](), nextPlayer(p)))
+            val children = fields.map(f => Node(f, List[GameTree](), nextPlayer(p)))
 
-            Node[Field](e, children.map(build(_, level + 1, upToLevel)), nextPlayer(p))
+            Node(e, children.map(build(_, level + 1, upToLevel)), nextPlayer(p))
           }
         }
 
@@ -104,23 +100,18 @@ object GameTree {
     }
   }
 
-  def moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
-
-  def collectFields(parentField: Field, player: Player,
-    hash: HashSet[String], acc: List[Field], total: Int, moves: List[(Int, Int)]): List[Field] = moves match {
+  private def collectFields(parentField: Field, player: Player, 
+      acc: List[Field], moves: List[(Int, Int)]): List[Field] = moves match {
     case Nil => acc
     case x :: tail => {
-      val move = Move(x._1, x._2, player)
+      val (row, col) = x
+      val move = Move(row, col, player)
 
       if (parentField.silentVerify(move)) {
-        val nextField = parentField.update(move)
-
-        if (!hash.contains(nextField.toString)) {
-          collectFields(parentField, player, hash + nextField.toString, nextField :: acc, total - 1, tail)
-        } else {
-          collectFields(parentField, player, hash, acc, total - 1, tail)
-        }
-      } else collectFields(parentField, player, hash, acc, total - 1, tail)
+        collectFields(parentField, player, parentField.update(move) :: acc, tail)
+      } else {
+        collectFields(parentField, player, acc, tail)
+      }
     }
   }
 
@@ -129,7 +120,7 @@ object GameTree {
     else PlayerType.X
   }
 
-  def print(tree: GameTree[Field], startLevel: Int): Unit = tree match {
+  def print(tree: GameTree, startLevel: Int): Unit = tree match {
     case Leaf => println("[]")
     case Node(e, ch, p) => {
       println("Level: " + startLevel)
@@ -140,7 +131,7 @@ object GameTree {
     }
   }
 
-  def printLevel(tree: GameTree[Field], level: Int, targetLevel: Int): Unit = tree match {
+  def printLevel(tree: GameTree, level: Int, targetLevel: Int): Unit = tree match {
     case Leaf => println("[]")
     case Node(e, ch, p) => {
       if (level == targetLevel - 1) {
