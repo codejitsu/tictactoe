@@ -24,7 +24,7 @@ case class Node(e: Field, children: List[GameTree], nextPlayer: PlayerType, game
   def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
 }
 
-case class MovePath(start: GameTree, moves: List[Field], status: Option[GameStatus])
+case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
 
 object GameTree {
   val start = Node(Field(), List[GameTree](), X, Playing)
@@ -34,29 +34,29 @@ object GameTree {
   
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
 
-  //TODO Streams
-  private def findWinOrTiePathsFrom(acc: List[MovePath], current: MovePath, 
-      startNode: GameTree, playerToWin: PlayerType): List[MovePath] = startNode match {
+  private def findWinOrTiePathsFrom(current: MovePath, 
+      startNode: GameTree, playerToWin: PlayerType): Stream[MovePath] = startNode match {
     case Node(e, ch, p, _) => {
-      ch.flatMap(findWinOrTiePathsFrom(acc, current.copy(moves = current.moves :+ e), _, playerToWin))
+      Stream.range(0, ch.size) flatMap (i => 
+        findWinOrTiePathsFrom(current.copy(moves = current.moves :+ e), ch(i), playerToWin))
     }
     
     case Leaf(status) => {
       val lastMove = current.moves.last
       
-	  if(status == Tie) acc :+ current.copy(status = Option(status))
+	  if(status == Tie) current.copy(status = Option(status)) #:: Stream.empty
 	  else 
 	  if ((status == XWon && playerToWin == X) || 
 	      (status == OWon && playerToWin == O)) {
-	    acc :+ current.copy(status = Option(status))
+	    current.copy(status = Option(status)) #:: Stream.empty
 	  } else {
-	    acc
+	    Stream.empty
 	  }
     }
   }
   
-  def allAdvices(startNode: GameTree, playerToWin: PlayerType) : List[MovePath] = {
-	val allWinTiePaths = findWinOrTiePathsFrom(List(), MovePath(startNode, List(), None), startNode, playerToWin)
+  def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
+	val allWinTiePaths = findWinOrTiePathsFrom(MovePath(startNode, Stream.empty, None), startNode, playerToWin)
     
 	val expectedStatuses = if (playerToWin == X) List(XWon, Tie) else List(OWon, Tie)
 	
@@ -66,9 +66,9 @@ object GameTree {
   def advice(startNode: GameTree, playerToWin: PlayerType) : MovePath = {
 	val allWinTiePaths = allAdvices(startNode, playerToWin)
 	
-	def findShortestWinPath(paths: List[MovePath]): MovePath = paths match {
-	  case x::Nil => x
-	  case x::tail => {
+	def findShortestWinPath(paths: Stream[MovePath]): MovePath = paths match {
+	  case x #:: Stream.Empty => x
+	  case x #:: tail => {
 	    if (x.status == XWon && playerToWin == X) x
 	    else if (x.status == OWon && playerToWin == O) x
 	    else findShortestWinPath(tail)
