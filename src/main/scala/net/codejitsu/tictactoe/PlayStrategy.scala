@@ -3,6 +3,7 @@ package net.codejitsu.tictactoe
 import scala.util.Random
 import scala.annotation.tailrec
 import net.codejitsu.tictactoe.PlayerType._
+import net.codejitsu.tictactoe.GameStatus._
 
 trait PlayStrategy {
   def makeMove(field: Field, player: Player): Move
@@ -51,7 +52,7 @@ class ReadConsoleStrategy extends PlayStrategy {
 }
 
 class GodStrategy extends PlayStrategy {
-  private lazy val gameTree: GameTree = buildGameTree(Node(Field(), List(), X), 0, X)
+  private lazy val gameTree: GameTree = buildGameTree(Node(Field(), List(), X, Playing), 0, X)
 
   private def buildGameTree(tree: GameTree, 
       level: Int, currentPlayer: PlayerType): GameTree = {
@@ -59,13 +60,13 @@ class GodStrategy extends PlayStrategy {
       val nextPlayer = if (currentPlayer == X) O else X
       buildGameTree(buildGameTreeLevel(tree, level, currentPlayer), level + 1, nextPlayer)
     } else {
-      Leaf
+      Leaf(Playing)
     }
   }
 
   private def buildGameTreeLevel(tree: GameTree, 
       level: Int, currentPlayer: PlayerType): GameTree = {
-    Leaf
+    Leaf(Playing)
   }
 
   def makeMove(field: Field, player: Player): Move = {

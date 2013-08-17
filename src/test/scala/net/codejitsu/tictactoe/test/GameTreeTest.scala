@@ -1,14 +1,26 @@
 package net.codejitsu.tictactoe.test
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
-import org.junit.Assert._
-import net.codejitsu.tictactoe.GameTree
-import net.codejitsu.tictactoe.GameTree
+
 import net.codejitsu.tictactoe.Field
+import net.codejitsu.tictactoe.FieldSize
+import net.codejitsu.tictactoe.Game
+import net.codejitsu.tictactoe.GameStatus
+import net.codejitsu.tictactoe.GameStatus.Tie
+import net.codejitsu.tictactoe.GameStatus.XWon
+import net.codejitsu.tictactoe.GameTree
 import net.codejitsu.tictactoe.Leaf
+import net.codejitsu.tictactoe.Move
+import net.codejitsu.tictactoe.MovePath
 import net.codejitsu.tictactoe.Node
-import net.codejitsu.tictactoe._
-import net.codejitsu.tictactoe.PlayerType._
+import net.codejitsu.tictactoe.Player
+import net.codejitsu.tictactoe.PlayerType.O
+import net.codejitsu.tictactoe.PlayerType.PlayerType
+import net.codejitsu.tictactoe.PlayerType.X
+import net.codejitsu.tictactoe.RandomMoveStrategy
 
 class GameTreeTest {
 	@Test
@@ -16,7 +28,7 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Node(e, ch, p) => assertTrue(ch.isEmpty)
+	    case Node(e, ch, p, _) => assertTrue(ch.isEmpty)
 	    case _ => fail()
 	  }
 	}
@@ -26,7 +38,7 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Node(e, _, _) => assertTrue(e.isEmpty)
+	    case Node(e, _, _, _) => assertTrue(e.isEmpty)
 	    case _ => fail()
 	  }
 	}
@@ -36,7 +48,7 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Node(_, _, p) => assertTrue(p == X)
+	    case Node(_, _, p, _) => assertTrue(p == X)
 	    case _ => fail()
 	  }
 	}	
@@ -46,8 +58,8 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
 	  
 	  firstLevel match {
-	    case Leaf => fail()
-	    case Node(e, ch, p) => {
+	    case Leaf(_) => fail()
+	    case Node(e, ch, p, _) => {
 	      assertTrue(!ch.isEmpty)
 	      assertEquals(FieldSize * FieldSize, ch.size)
 	    }
@@ -59,10 +71,10 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
 	  
 	  firstLevel match {
-	    case Leaf => fail()
-	    case Node(e, ch, p) => {
+	    case Leaf(_) => fail()
+	    case Node(e, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf => fail()
+	    	  case Leaf(_) => fail()
 	    	  case _ => ()
 	    	})
 	    }
@@ -80,10 +92,10 @@ class GameTreeTest {
 	  val allFields = moves.map(m => fieldInit.update(Move(m._1, m._2, player))).map(_.toString)
 	  
 	  firstLevel match {
-	    case Leaf => fail()
-	    case Node(e, ch, p) => {
+	    case Leaf(_) => fail()
+	    case Node(e, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf => fail()
+	    	  case Leaf(_) => fail()
 	    	  case x => allFields.contains(x.toString)
 	    	})
 	    }
@@ -96,11 +108,11 @@ class GameTreeTest {
 	  val secondLevel = GameTree.build(firstLevel, 1, 3)
 
 	  secondLevel match {
-	    case Leaf => fail()
-	    case Node(e, ch, p) => {
+	    case Leaf(_) => fail()
+	    case Node(e, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf => fail()
-	    	  case Node(e2, ch2, p2) => {
+	    	  case Leaf(_) => fail()
+	    	  case Node(e2, ch2, p2, _) => {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
 	    	  }
@@ -115,11 +127,11 @@ class GameTreeTest {
 	  val secondLevel = GameTree.build(firstLevel, 1, 3)
 
 	  secondLevel match {
-	    case Leaf => fail()
-	    case Node(e, ch, p) => {
+	    case Leaf(_) => fail()
+	    case Node(e, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf => fail()
-	    	  case Node(e2, ch2, p2) => {
+	    	  case Leaf(_) => fail()
+	    	  case Node(e2, ch2, p2, _) => {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
 	    		  
@@ -144,30 +156,39 @@ class GameTreeTest {
 	  val tree = buildTree(GameTree.start, 1, 9)
 	  val path = generateWinPath(tree, X)
 	  
-	  assertTrue(path.moves.size > 5)
-	  
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
 	      Player("O", O, new RandomMoveStrategy()))
 	  
 	  val status = game.calculateStatus(path.moves.last)
 
-	  assertTrue(status == GameStatus.XWon || status == GameStatus.Tie)
+	  assertTrue(status == XWon || status == Tie)
 	}
 
 	@Test
 	def testAdviceOWonOrTie() {
 	  val tree = buildTree(GameTree.start, 1, 9)
-	  val moves = generateWinPath(tree, O)
+	  val path = generateWinPath(tree, O)
 	  
-	  assertTrue(moves.moves.size > 5)
+	  assertTrue(path.moves.size > 5)
 
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
 	      Player("O", O, new RandomMoveStrategy()))
 	  
-	  val status = game.calculateStatus(moves.moves.last)
+	  val status = game.calculateStatus(path.moves.last)
 
 	  assertTrue(status == GameStatus.OWon || status == GameStatus.Tie)
 	}	
+	
+	@Test
+	def winPathsContainTie() {
+	  val tree = buildTree(GameTree.start, 1, 9)
+	  val paths = GameTree.allAdvices(tree, X)
+	  
+	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
+	      Player("O", O, new RandomMoveStrategy()))	  
+	  
+	  assertTrue(paths.exists(p => game.calculateStatus(p.moves.last) == Tie))
+	}
 	
 	def generateWinPath(start: GameTree, playerToWin: PlayerType): MovePath = {
 	  GameTree.advice(start, playerToWin)
