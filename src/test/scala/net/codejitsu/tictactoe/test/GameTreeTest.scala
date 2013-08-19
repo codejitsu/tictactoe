@@ -7,9 +7,7 @@ import org.junit.Test
 import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.FieldSize
 import net.codejitsu.tictactoe.Game
-import net.codejitsu.tictactoe.GameStatus
-import net.codejitsu.tictactoe.GameStatus.Tie
-import net.codejitsu.tictactoe.GameStatus.XWon
+import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.GameTree
 import net.codejitsu.tictactoe.Leaf
 import net.codejitsu.tictactoe.Move
@@ -55,7 +53,7 @@ class GameTreeTest {
 	
 	@Test
 	def firstLevelIsNotEmptyConsistsOfNineElements() {
-	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
+	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  firstLevel match {
 	    case Leaf(_) => fail()
@@ -68,7 +66,7 @@ class GameTreeTest {
 	
 	@Test
 	def firstLevelAllElementsAreNodes() {
-	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
+	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  firstLevel match {
 	    case Leaf(_) => fail()
@@ -83,7 +81,7 @@ class GameTreeTest {
 	
 	@Test
 	def firstLevelContainsAllCorrectMoves() {
-	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
+	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  val fieldInit = Field()
 	  val player = Player("Player", X, new RandomMoveStrategy)
@@ -98,14 +96,15 @@ class GameTreeTest {
 	    	  case Leaf(_) => fail()
 	    	  case x => allFields.contains(x.toString)
 	    	})
+	    	
+	    	assertTrue(allFields.size == ch.size)
 	    }
 	  }	  
 	}
 	
 	@Test
 	def eachNodeOnSecondLevelHasEightChildren() {
-	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
-	  val secondLevel = GameTree.build(firstLevel, 1, 3)
+	  val secondLevel = GameTree.build(GameTree.start, 1)
 
 	  secondLevel match {
 	    case Leaf(_) => fail()
@@ -123,10 +122,9 @@ class GameTreeTest {
 
 	@Test
 	def secondLevelContainsAllCorrectMoves() {
-	  val firstLevel = GameTree.build(GameTree.start, 1, 2)
-	  val secondLevel = GameTree.build(firstLevel, 1, 3)
+	  val firstLevel = GameTree.build(GameTree.start, 1)
 
-	  secondLevel match {
+	  firstLevel match {
 	    case Leaf(_) => fail()
 	    case Node(e, ch, p, _) => {
 	    	ch.foreach(c => c match {
@@ -148,13 +146,13 @@ class GameTreeTest {
 	
 	@Test
 	def generateCompleteTree() {
-	  val tree = buildTree(GameTree.start, 1, 9)
+	  val tree = buildTree(GameTree.start, 1)
 	}
 	
 	@Test
 	@Ignore
 	def testAdviceXWonOrTie() {
-	  val tree = buildTree(GameTree.start, 1, 9)
+	  val tree = buildTree(GameTree.start, 1)
 	  val path = generateWinPath(tree, X)
 	  
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
@@ -168,7 +166,7 @@ class GameTreeTest {
 	@Test
 	@Ignore
 	def testAdviceOWonOrTie() {
-	  val tree = buildTree(GameTree.start, 1, 9)
+	  val tree = buildTree(GameTree.start, 1)
 	  val path = generateWinPath(tree, O)
 	  
 	  assertTrue(path.moves.size > 5)
@@ -178,18 +176,29 @@ class GameTreeTest {
 	  
 	  val status = game.calculateStatus(path.moves.last)
 
-	  assertTrue(status == GameStatus.OWon || status == GameStatus.Tie)
+	  assertTrue(status == OWon || status == Tie)
 	}	
 	
 	@Test
+	@Ignore
 	def winPathsContainTie() {
-	  val tree = buildTree(GameTree.start, 1, 9)
+	  val tree = buildTree(GameTree.start, 1)
 	  val paths = GameTree.allAdvices(tree, X)
 	  
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
 	      Player("O", O, new RandomMoveStrategy()))	  
 	  
 	  assertTrue(paths.exists(p => game.calculateStatus(p.moves.last) == Tie))
+	}
+	
+	@Test
+	def generateTreeWithConstraint() {
+	  val moves =  List((0, 0), (0, 1), (0, 2))
+	  val tree = buildTreeWithConstraint(GameTree.start, 1, moves)
+	  
+	  val paths = GameTree.allAdvicesWithStatus(tree, X, List(NotStarted, Playing, XWon, OWon, Tie))
+	  
+	  assertEquals(6, paths.length)	  
 	}
 	
 	def generateWinPath(start: GameTree, playerToWin: PlayerType): MovePath = {
@@ -205,10 +214,11 @@ class GameTreeTest {
 	  moves.filter(m => m._1 != xmove._2 && m._2 != xmove._3).map(m => field.update(Move(m._1, m._2, player)))	  
 	}
 	
-	def buildTree(tree: GameTree, level: Int, upToLevel: Int): GameTree = {
-	  if (level == upToLevel) tree
-	  else {
-	    buildTree(GameTree.build(tree, 1, level + 1), level + 1, upToLevel)
-	  }
+	def buildTreeWithConstraint(tree: GameTree, level: Int, constraint: List[(Int, Int)]): GameTree = {
+	  GameTree.buildWithConstraint(tree, 1, constraint)
+	}
+	
+	def buildTree(tree: GameTree, level: Int): GameTree = {
+	    GameTree.build(tree, 1)
 	}
 }

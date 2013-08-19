@@ -1,7 +1,5 @@
 package net.codejitsu.tictactoe
 
-import scala.collection.immutable.Stream.consWrapper
-
 import net.codejitsu.tictactoe.GameStatus.GameStatus
 import net.codejitsu.tictactoe.GameStatus.OWon
 import net.codejitsu.tictactoe.GameStatus.Playing
@@ -29,8 +27,8 @@ case class Node(e: Field, children: List[GameTree], nextPlayer: PlayerType, game
   def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
 }
 
-case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
-object EmptyPath extends MovePath(Leaf(Playing), Stream.empty, Option(Playing))
+case class MovePath(start: GameTree, moves: List[Field], status: Option[GameStatus])
+object EmptyPath extends MovePath(Leaf(Playing), Nil, Option(Playing))
 
 object GameTree {
   val start = Node(Field(), List[GameTree](), X, Playing)
@@ -41,29 +39,29 @@ object GameTree {
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
 
   private def findWinOrTiePathsFrom(current: MovePath, 
-      startNode: GameTree, playerToWin: PlayerType): Stream[MovePath] = startNode match {
-    case Node(e, ch, p, _) => {
-      Stream.range(0, ch.size) flatMap (i => 
-        findWinOrTiePathsFrom(current.copy(moves = current.moves :+ e), ch(i), playerToWin))
+      startNode: GameTree, playerToWin: PlayerType, acc: List[MovePath]): List[MovePath] = startNode match {
+    case Node(e, children, p, s) => {
+      if (children.isEmpty) {
+        acc ::: List(current.copy(moves = current.moves ::: List(e)))
+      } else {
+        val childsPaths = children.flatMap(ch => findWinOrTiePathsFrom(current, ch, playerToWin, acc))
+        
+        childsPaths.map(ch => ch.copy(moves = e :: ch.moves))
+      }
     }
     
-    case Leaf(status) => {
-	  if(status == Tie) current.copy(status = Option(status)) #:: Stream.empty
-	  else 
-	  if ((status == XWon && playerToWin == X) || 
-	      (status == OWon && playerToWin == O)) {
-	    current.copy(status = Option(status)) #:: Stream.empty
-	  } else {
-	    Stream.empty
-	  }
-    }
+    case Leaf(s) => acc ::: List(current)
   }
   
-  def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
-	val allWinTiePaths = findWinOrTiePathsFrom(MovePath(startNode, Stream.empty, None), startNode, playerToWin)
+  def allAdvices(startNode: GameTree, playerToWin: PlayerType) : List[MovePath] = {
+    val expectedStatuses = if (playerToWin == X) List(XWon, Tie) else List(OWon, Tie)
+    allAdvicesWithStatus(startNode, playerToWin, expectedStatuses)
+  }
+  
+  def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
+      expectedStatuses: List[GameStatus]) : List[MovePath] = {
+	val allWinTiePaths = findWinOrTiePathsFrom(EmptyPath, startNode, playerToWin, Nil)
     
-	val expectedStatuses = if (playerToWin == X) List(XWon, Tie) else List(OWon, Tie)
-	
 	allWinTiePaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
   }
   
@@ -98,27 +96,28 @@ object GameTree {
     }
   }  
     
-  def build(tree: GameTree, level: Int, upToLevel: Int): GameTree = {
-    if (upToLevel == 0) throw new IllegalArgumentException("0")
-    //else if (level == upToLevel) tree
-    else if (isTreeCompleted(tree)) {
+  def build(tree: GameTree, level: Int) = {
+    buildWithConstraint(tree, level, this.all_moves)
+  }
+  
+  def buildWithConstraint(tree: GameTree, level: Int,
+      constraint: List[(Int, Int)]): GameTree = {
+    if (isTreeCompleted(tree)) {
       tree
     } else {
       tree match {
         case Node(e, ch, p, s) => {
-         // if (e.field.size > 8) println("wow!")
-          
           if (this.isGameOver(s)) {
-            build(Node(e, List(Leaf(s)), p, Playing), level + 1, upToLevel)
+            build(Node(e, List(Leaf(s)), p, Playing), level + 1)
           } else {
             val player = Player("Player", p, new RandomMoveStrategy())
 
-            val fields = collectFields(e, player, List.empty[Field], this.all_moves)
+            val fields = collectFields(e, player, List.empty[Field], constraint)
 
             val nextPl = nextPlayer(p)
             
-            val children = fields.map(f => build(Node(f, List[GameTree](), 
-                nextPl, this.game.calculateStatus(f)), level + 1, upToLevel))
+            val children = fields.map(f => buildWithConstraint(Node(f, List[GameTree](), 
+                nextPl, this.game.calculateStatus(f)), level + 1, constraint))
 
             Node(e, children, p, s)
           }
@@ -150,7 +149,7 @@ object GameTree {
   }
 
   def print(tree: GameTree, startLevel: Int): Unit = tree match {
-    case Leaf(s) => println("[]: " + s)
+    case Leaf(s) => println("Leaf => " + s)
     case Node(e, ch, p, _) => {
       println("Level: " + startLevel)
       val field = e
@@ -161,7 +160,7 @@ object GameTree {
   }
 
   def printLevel(tree: GameTree, level: Int, targetLevel: Int): Unit = tree match {
-    case Leaf(s) => println("[]: " + s)
+    case Leaf(s) => println("Leaf => " + s)
     case Node(e, ch, p, _) => {
       if (level == targetLevel - 1) {
         println("Level: " + targetLevel)
