@@ -1,10 +1,15 @@
 package net.codejitsu.tictactoe
 
-import net.codejitsu.tictactoe.PlayerType._
-import scala.collection.immutable.HashMap
-import scala.collection.immutable.HashSet
-import net.codejitsu.tictactoe.GameStatus._
-import scala.collection.script.Update
+import scala.collection.immutable.Stream.consWrapper
+
+import net.codejitsu.tictactoe.GameStatus.GameStatus
+import net.codejitsu.tictactoe.GameStatus.OWon
+import net.codejitsu.tictactoe.GameStatus.Playing
+import net.codejitsu.tictactoe.GameStatus.Tie
+import net.codejitsu.tictactoe.GameStatus.XWon
+import net.codejitsu.tictactoe.PlayerType.O
+import net.codejitsu.tictactoe.PlayerType.PlayerType
+import net.codejitsu.tictactoe.PlayerType.X
 
 sealed trait GameTree {
   def nextPlayer: PlayerType
@@ -25,6 +30,7 @@ case class Node(e: Field, children: List[GameTree], nextPlayer: PlayerType, game
 }
 
 case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
+object EmptyPath extends MovePath(Leaf(Playing), Stream.empty, Option(Playing))
 
 object GameTree {
   val start = Node(Field(), List[GameTree](), X, Playing)
@@ -42,8 +48,6 @@ object GameTree {
     }
     
     case Leaf(status) => {
-      val lastMove = current.moves.last
-      
 	  if(status == Tie) current.copy(status = Option(status)) #:: Stream.empty
 	  else 
 	  if ((status == XWon && playerToWin == X) || 
@@ -66,16 +70,21 @@ object GameTree {
   def advice(startNode: GameTree, playerToWin: PlayerType) : MovePath = {
 	val allWinTiePaths = allAdvices(startNode, playerToWin)
 	
-	def findShortestWinPath(paths: Stream[MovePath]): MovePath = paths match {
-	  case x #:: Stream.Empty => x
-	  case x #:: tail => {
-	    if (x.status == XWon && playerToWin == X) x
-	    else if (x.status == OWon && playerToWin == O) x
-	    else findShortestWinPath(tail)
+	def findShortestWinPath(paths: Iterator[MovePath]): MovePath = {
+	  var bestMatch: MovePath = EmptyPath
+	  
+	  for(x <- paths) {
+        if (x.status == XWon && playerToWin == X || x.status == OWon && playerToWin == O) { 
+		  if (x.moves.size <= bestMatch.moves.size) {
+		    bestMatch = x
+		  } 
+	    }
 	  }
+	  
+	  bestMatch
 	}
 	
-    findShortestWinPath(allWinTiePaths.sortBy(_.moves.size))
+    findShortestWinPath(allWinTiePaths.toIterator)
   }
 
   private def isGameOver(status: GameStatus) = 

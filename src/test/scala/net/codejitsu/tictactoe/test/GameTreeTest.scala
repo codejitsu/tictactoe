@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
-
 import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.FieldSize
 import net.codejitsu.tictactoe.Game
@@ -21,6 +20,7 @@ import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
 import net.codejitsu.tictactoe.RandomMoveStrategy
+import org.junit.Ignore
 
 class GameTreeTest {
 	@Test
@@ -152,6 +152,7 @@ class GameTreeTest {
 	}
 	
 	@Test
+	@Ignore
 	def testAdviceXWonOrTie() {
 	  val tree = buildTree(GameTree.start, 1, 9)
 	  val path = generateWinPath(tree, X)
@@ -165,6 +166,7 @@ class GameTreeTest {
 	}
 
 	@Test
+	@Ignore
 	def testAdviceOWonOrTie() {
 	  val tree = buildTree(GameTree.start, 1, 9)
 	  val path = generateWinPath(tree, O)
