@@ -13,18 +13,20 @@ sealed trait GameTree {
   def nextPlayer: PlayerType
   def toList: List[Field]
   def mkString: String
+  def nodes: List[GameTree]
 }
 
 case class Leaf(gameStatus: GameStatus) extends GameTree {
   def nextPlayer = null
   def toList = Nil
   def mkString = "-"
+  def nodes = Nil
 }
 
 case class Node(e: Field, children: List[GameTree], nextPlayer: PlayerType, gameStatus: GameStatus) extends GameTree {
   def toList = e :: children.foldLeft(List[Field]())(_ ::: _.toList)
-
   def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
+  def nodes = children
 }
 
 case class MovePath(start: GameTree, moves: List[Field], status: Option[GameStatus])
