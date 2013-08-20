@@ -15,7 +15,7 @@ sealed trait GameTree {
   def nextPlayer: PlayerType
   def toList: List[Field]
   def mkString: String
-  def nodes: List[GameTree]
+  val nodes: Stream[GameTree]
   def status: GameStatus
   def parent: GameTree
 }
@@ -24,15 +24,15 @@ case class Leaf(gameStatus: GameStatus, par: GameTree) extends GameTree {
   def nextPlayer = null
   def toList = Nil
   def mkString = "-"
-  def nodes = Nil
+  val nodes = Stream.Empty
   def status = gameStatus
   def parent = par
 }
 
-case class Node(e: Field, par: GameTree, children: List[GameTree], nextPlayer: PlayerType, gameStatus: GameStatus) extends GameTree {
+case class Node(e: Field, par: GameTree, children: Stream[GameTree], nextPlayer: PlayerType, gameStatus: GameStatus) extends GameTree {
   def toList = e :: children.foldLeft(List[Field]())(_ ::: _.toList)
   def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
-  def nodes = children
+  lazy val nodes = children
   def status = gameStatus
   def parent = par
 }
@@ -41,7 +41,7 @@ object Root extends GameTree {
   def nextPlayer = null
   def toList = Nil
   def mkString = "-"
-  def nodes = Nil
+  val nodes = Stream.Empty
   def status = NotStarted
   def parent = Root 
 }
@@ -50,16 +50,16 @@ object Sink extends GameTree {
   def nextPlayer = null
   def toList = Nil
   def mkString = "-"
-  def nodes = Nil
+  val nodes = Stream.Empty
   def status = NotStarted
   def parent = Sink  
 }
 
-case class MovePath(start: GameTree, moves: List[Field], status: Option[GameStatus])
-object EmptyPath extends MovePath(Root, List[Field](Field()), Option(Playing))
+case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
+object EmptyPath extends MovePath(Root, Stream.empty[Field], Option(Playing))
 
 object GameTree {
-  val start = Node(Field(), Root, List[GameTree](), X, Playing)
+  val start = Node(Field(), Root, Stream.empty[GameTree], X, Playing)
   
   val leafsXWon = ListBuffer.empty[GameTree]
   val leafsOWon = ListBuffer.empty[GameTree]
@@ -70,8 +70,8 @@ object GameTree {
   
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
 
-  private def findPathsFrom(startNode: GameTree, children: List[GameTree], current: MovePath,
-      playerToWin: PlayerType, acc: List[MovePath]): List[MovePath] = startNode match {
+  private def findPathsFrom(startNode: GameTree, children: Stream[GameTree], current: MovePath,
+      playerToWin: PlayerType, acc: Stream[MovePath]): Stream[MovePath] = startNode match {
     case Leaf(_, _) => {
       acc :+ current
     }
@@ -86,14 +86,14 @@ object GameTree {
     }
   }
   
-  def allAdvices(startNode: GameTree, playerToWin: PlayerType) : List[MovePath] = {
+  def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
     val expectedStatuses = if (playerToWin == X) List(XWon, Tie) else List(OWon, Tie)
     allAdvicesWithStatus(startNode, playerToWin, expectedStatuses)
   }
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
-      expectedStatuses: List[GameStatus]) : List[MovePath] = {
-	val allWinTiePaths = findPathsFrom(startNode, startNode.nodes, EmptyPath, playerToWin, Nil)
+      expectedStatuses: List[GameStatus]) : Stream[MovePath] = {
+	val allWinTiePaths = findPathsFrom(startNode, startNode.nodes, EmptyPath, playerToWin, Stream.empty[MovePath])
     
 	allWinTiePaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
   }
@@ -149,15 +149,15 @@ object GameTree {
       tree match {
         case node@Node(e, par, ch, p, s) => {
           if (this.isGameOver(s)) {
-            buildWithConstraint(Node(e, par, List(Leaf(s, Sink)), p, Playing), level + 1, constraint)
+            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(s, Sink), p, Playing), level + 1, constraint)
           } else {
             val player = Player("Player", p, new RandomMoveStrategy())
 
-            val fields = collectFields(e, player, List.empty[Field], constraint)
+            val fields = collectFields(e, player, List.empty[Field], constraint).toStream
 
             val nextPl = nextPlayer(p)
             
-            val children = fields.map(f => buildWithConstraint(Node(f, node, List[GameTree](), 
+            val children = fields.map(f => buildWithConstraint(Node(f, node, Stream.empty[GameTree], 
                 nextPl, this.game.calculateStatus(f)), level + 1, constraint))
 
             Node(e, node, children, p, s)

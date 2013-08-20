@@ -52,7 +52,7 @@ class ReadConsoleStrategy extends PlayStrategy {
 }
 
 class GodStrategy extends PlayStrategy {
-  private lazy val gameTree: GameTree = buildGameTree(Node(Field(), Root, List(), X, Playing), 0, X)
+  private lazy val gameTree: GameTree = buildGameTree(Node(Field(), Root, Stream.Empty, X, Playing), 0, X)
 
   private def buildGameTree(tree: GameTree, 
       level: Int, currentPlayer: PlayerType): GameTree = {
