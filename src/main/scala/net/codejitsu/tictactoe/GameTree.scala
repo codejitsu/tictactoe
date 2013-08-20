@@ -8,12 +8,15 @@ import net.codejitsu.tictactoe.GameStatus.XWon
 import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
+import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
 sealed trait GameTree {
   def nextPlayer: PlayerType
   def toList: List[Field]
   def mkString: String
   def nodes: List[GameTree]
+  def status: GameStatus
 }
 
 case class Leaf(gameStatus: GameStatus) extends GameTree {
@@ -21,37 +24,45 @@ case class Leaf(gameStatus: GameStatus) extends GameTree {
   def toList = Nil
   def mkString = "-"
   def nodes = Nil
+  def status = gameStatus
 }
 
 case class Node(e: Field, children: List[GameTree], nextPlayer: PlayerType, gameStatus: GameStatus) extends GameTree {
   def toList = e :: children.foldLeft(List[Field]())(_ ::: _.toList)
   def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
   def nodes = children
+  def status = gameStatus
 }
 
 case class MovePath(start: GameTree, moves: List[Field], status: Option[GameStatus])
-object EmptyPath extends MovePath(Leaf(Playing), Nil, Option(Playing))
+object EmptyPath extends MovePath(Leaf(Playing), List[Field](Field()), Option(Playing))
 
 object GameTree {
   val start = Node(Field(), List[GameTree](), X, Playing)
+  
+  val leafsXWon = ListBuffer.empty[GameTree]
+  val leafsOWon = ListBuffer.empty[GameTree]
+  val leafsTie = ListBuffer.empty[GameTree]
   
   private val game = Game(Player("X", X, new RandomMoveStrategy),
     Player("O", O, new RandomMoveStrategy))
   
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
 
-  private def findPathsFrom(current: MovePath, 
-      startNode: GameTree, playerToWin: PlayerType, acc: List[MovePath]): List[MovePath] = startNode match {
-    case Node(e, children, p, s) => {
+  private def findPathsFrom(startNode: GameTree, children: List[GameTree], current: MovePath,
+      playerToWin: PlayerType, acc: List[MovePath]): List[MovePath] = startNode match {
+    case Leaf(_) => {
+      acc :+ current
+    }
+
+    case Node(f, _, _, _) => {
       if (children.isEmpty) {
-        acc :+ current.copy(moves = current.moves :+ e)
+        acc :+ current
       } else {
-        children.flatMap(ch => findPathsFrom(current.copy(moves = current.moves :+ e), 
-            ch, playerToWin, acc))
+        val appended = current.copy(moves = current.moves :+ f)
+        children.flatMap(c => findPathsFrom(c, c.nodes, appended, playerToWin, acc)) 
       }
     }
-    
-    case Leaf(s) => acc :+ current
   }
   
   def allAdvices(startNode: GameTree, playerToWin: PlayerType) : List[MovePath] = {
@@ -61,7 +72,7 @@ object GameTree {
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
       expectedStatuses: List[GameStatus]) : List[MovePath] = {
-	val allWinTiePaths = findPathsFrom(EmptyPath, startNode, playerToWin, Nil)
+	val allWinTiePaths = findPathsFrom(startNode, startNode.nodes, EmptyPath, playerToWin, Nil)
     
 	allWinTiePaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
   }
@@ -98,18 +109,26 @@ object GameTree {
   }  
     
   def build(tree: GameTree, level: Int) = {
+    this.leafsOWon.clear()
+    this.leafsXWon.clear()
+    this.leafsTie.clear();
+    
     buildWithConstraint(tree, level, this.all_moves)
   }
   
   def buildWithConstraint(tree: GameTree, level: Int,
       constraint: List[(Int, Int)]): GameTree = {
     if (isTreeCompleted(tree)) {
+      if (tree.status == XWon) this.leafsXWon += tree
+      if (tree.status == OWon) this.leafsOWon += tree
+      if (tree.status == Tie) this.leafsTie += tree
+      
       tree
     } else {
       tree match {
         case Node(e, ch, p, s) => {
           if (this.isGameOver(s)) {
-            build(Node(e, List(Leaf(s)), p, Playing), level + 1)
+            buildWithConstraint(Node(e, List(Leaf(s)), p, Playing), level + 1, constraint)
           } else {
             val player = Player("Player", p, new RandomMoveStrategy())
 
