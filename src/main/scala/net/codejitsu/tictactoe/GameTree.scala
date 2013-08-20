@@ -55,8 +55,8 @@ object Sink extends GameTree {
   def parent = Sink  
 }
 
-case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
-object EmptyPath extends MovePath(Root, Stream.empty[Field], Option(Playing))
+case class MovePath(start: GameTree, moves: Stream[Field], last: Field, status: Option[GameStatus])
+object EmptyPath extends MovePath(Root, Stream.empty[Field], Field(), Option(Playing))
 
 object GameTree {
   val start = Node(Field(), Root, Stream.empty[GameTree], X, Playing)
@@ -70,17 +70,17 @@ object GameTree {
   
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
 
-  private def findPathsFrom(startNode: GameTree, children: Stream[GameTree], current: MovePath,
+  private def findPathsFrom(startNode: GameTree, children: Stream[GameTree], current: Stream[Field],
       playerToWin: PlayerType, acc: Stream[MovePath]): Stream[MovePath] = startNode match {
     case Leaf(_, _) => {
-      acc :+ current
+      acc :+ MovePath(Root, current, current.last, Option(Playing))
     }
 
     case Node(f, _, _, _, _) => {
       if (children.isEmpty) {
-        acc :+ current
+        acc :+ MovePath(Root, current.toStream, current.last, Option(Playing))
       } else {
-        val appended = current.copy(moves = current.moves :+ f)
+        val appended = current :+ f
         children.flatMap(c => findPathsFrom(c, c.nodes, appended, playerToWin, acc)) 
       }
     }
@@ -93,7 +93,7 @@ object GameTree {
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
       expectedStatuses: List[GameStatus]) : Stream[MovePath] = {
-	val allWinTiePaths = findPathsFrom(startNode, startNode.nodes, EmptyPath, playerToWin, Stream.empty[MovePath])
+	val allWinTiePaths = findPathsFrom(startNode, startNode.nodes, Stream.Empty, playerToWin, Stream.empty[MovePath])
     
 	allWinTiePaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
   }
