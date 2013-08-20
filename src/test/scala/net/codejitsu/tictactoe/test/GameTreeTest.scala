@@ -180,7 +180,6 @@ class GameTreeTest {
 	}	
 	
 	@Test
-	@Ignore
 	def winPathsContainTie() {
 	  val tree = buildTree(GameTree.start, 1)
 	  val paths = GameTree.allAdvices(tree, X)

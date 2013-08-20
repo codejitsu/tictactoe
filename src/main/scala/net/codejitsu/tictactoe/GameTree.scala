@@ -38,19 +38,18 @@ object GameTree {
   
   private val all_moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))  
 
-  private def findWinOrTiePathsFrom(current: MovePath, 
+  private def findPathsFrom(current: MovePath, 
       startNode: GameTree, playerToWin: PlayerType, acc: List[MovePath]): List[MovePath] = startNode match {
     case Node(e, children, p, s) => {
       if (children.isEmpty) {
-        acc ::: List(current.copy(moves = current.moves ::: List(e)))
+        acc :+ current.copy(moves = current.moves :+ e)
       } else {
-        val childsPaths = children.flatMap(ch => findWinOrTiePathsFrom(current, ch, playerToWin, acc))
-        
-        childsPaths.map(ch => ch.copy(moves = e :: ch.moves))
+        children.flatMap(ch => findPathsFrom(current.copy(moves = current.moves :+ e), 
+            ch, playerToWin, acc))
       }
     }
     
-    case Leaf(s) => acc ::: List(current)
+    case Leaf(s) => acc :+ current
   }
   
   def allAdvices(startNode: GameTree, playerToWin: PlayerType) : List[MovePath] = {
@@ -60,7 +59,7 @@ object GameTree {
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
       expectedStatuses: List[GameStatus]) : List[MovePath] = {
-	val allWinTiePaths = findWinOrTiePathsFrom(EmptyPath, startNode, playerToWin, Nil)
+	val allWinTiePaths = findPathsFrom(EmptyPath, startNode, playerToWin, Nil)
     
 	allWinTiePaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
   }
