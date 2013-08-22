@@ -56,7 +56,7 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  firstLevel match {
-	    case Leaf(_, _) => fail()
+	    case Leaf(_, _, _) => fail()
 	    case Node(e, _, ch, p, _) => {
 	      assertTrue(!ch.isEmpty)
 	      assertEquals(FieldSize * FieldSize, ch.size)
@@ -69,10 +69,10 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  firstLevel match {
-	    case Leaf(_, _) => fail()
+	    case Leaf(_, _, _) => fail()
 	    case Node(e, _, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _) => fail()
+	    	  case Leaf(_, _, _) => fail()
 	    	  case _ => ()
 	    	})
 	    }
@@ -90,10 +90,10 @@ class GameTreeTest {
 	  val allFields = moves.map(m => fieldInit.update(Move(m._1, m._2, player))).map(_.toString)
 	  
 	  firstLevel match {
-	    case Leaf(_, _) => fail()
+	    case Leaf(_, _, _) => fail()
 	    case Node(e, _, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _) => fail()
+	    	  case Leaf(_, _, _) => fail()
 	    	  case x => allFields.contains(x.toString)
 	    	})
 	    	
@@ -107,10 +107,10 @@ class GameTreeTest {
 	  val secondLevel = GameTree.build(GameTree.start, 1)
 
 	  secondLevel match {
-	    case Leaf(_, _) => fail()
+	    case Leaf(_, _, _) => fail()
 	    case Node(e, _, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _) => fail()
+	    	  case Leaf(_, _, _) => fail()
 	    	  case Node(e2, _, ch2, p2, _) => {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
@@ -125,10 +125,10 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1)
 
 	  firstLevel match {
-	    case Leaf(_, _) => fail()
+	    case Leaf(_, _, _) => fail()
 	    case Node(e, _, ch, p, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _) => fail()
+	    	  case Leaf(_, _, _) => fail()
 	    	  case Node(e2, _, ch2, p2, _) => {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
@@ -187,7 +187,7 @@ class GameTreeTest {
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
 	      Player("O", O, new RandomMoveStrategy()))	  
 	  
-	  assertTrue(paths.exists(p => game.calculateStatus(p.last) == Tie))
+	  assertTrue(paths.exists(p => game.calculateStatus(p.moves.head) == Tie))
 	}
 	
 	@Test

@@ -60,13 +60,13 @@ class GodStrategy extends PlayStrategy {
       val nextPlayer = if (currentPlayer == X) O else X
       buildGameTree(buildGameTreeLevel(tree, level, currentPlayer), level + 1, nextPlayer)
     } else {
-      Leaf(Playing, Root)
+      Leaf(Field(), Playing, Root)
     }
   }
 
   private def buildGameTreeLevel(tree: GameTree, 
       level: Int, currentPlayer: PlayerType): GameTree = {
-    Leaf(Playing, Root)
+    Leaf(Field(), Playing, Root)
   }
 
   def makeMove(field: Field, player: Player): Move = {

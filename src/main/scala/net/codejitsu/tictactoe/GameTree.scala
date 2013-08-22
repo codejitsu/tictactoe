@@ -1,15 +1,17 @@
 package net.codejitsu.tictactoe
 
+import scala.collection.immutable.Stream.consWrapper
+import scala.collection.mutable.ListBuffer
+
 import net.codejitsu.tictactoe.GameStatus.GameStatus
+import net.codejitsu.tictactoe.GameStatus.NotStarted
 import net.codejitsu.tictactoe.GameStatus.OWon
-import net.codejitsu.tictactoe.GameStatus.{Playing, NotStarted}
+import net.codejitsu.tictactoe.GameStatus.Playing
 import net.codejitsu.tictactoe.GameStatus.Tie
 import net.codejitsu.tictactoe.GameStatus.XWon
 import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
-import scala.annotation.tailrec
-import scala.collection.mutable.ListBuffer
 
 sealed trait GameTree {
   def nextPlayer: PlayerType
@@ -18,15 +20,17 @@ sealed trait GameTree {
   val nodes: Stream[GameTree]
   def status: GameStatus
   def parent: GameTree
+  def field: Field
 }
 
-case class Leaf(gameStatus: GameStatus, par: GameTree) extends GameTree {
+case class Leaf(e: Field, gameStatus: GameStatus, par: GameTree) extends GameTree {
   def nextPlayer = null
   def toList = Nil
   def mkString = "-"
   val nodes = Stream.Empty
   def status = gameStatus
   def parent = par
+  def field = e
 }
 
 case class Node(e: Field, par: GameTree, children: Stream[GameTree], nextPlayer: PlayerType, gameStatus: GameStatus) extends GameTree {
@@ -35,6 +39,7 @@ case class Node(e: Field, par: GameTree, children: Stream[GameTree], nextPlayer:
   lazy val nodes = children
   def status = gameStatus
   def parent = par
+  def field = e
 }
 
 object Root extends GameTree {
@@ -44,6 +49,7 @@ object Root extends GameTree {
   val nodes = Stream.Empty
   def status = NotStarted
   def parent = Root 
+  def field = Field()
 }
 
 object Sink extends GameTree {
@@ -53,10 +59,11 @@ object Sink extends GameTree {
   val nodes = Stream.Empty
   def status = NotStarted
   def parent = Sink  
+  def field = Field()
 }
 
-case class MovePath(start: GameTree, moves: Stream[Field], last: Field, status: Option[GameStatus])
-object EmptyPath extends MovePath(Root, Stream.empty[Field], Field(), Option(Playing))
+case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
+object EmptyPath extends MovePath(Root, Stream.empty[Field], Option(Playing))
 
 object GameTree {
   val start = Node(Field(), Root, Stream.empty[GameTree], X, Playing)
@@ -72,17 +79,38 @@ object GameTree {
 
   private def findPathsFrom(startNode: GameTree, children: Stream[GameTree], current: Stream[Field],
       playerToWin: PlayerType, acc: Stream[MovePath]): Stream[MovePath] = startNode match {
-    case Leaf(_, _) => {
-      acc :+ MovePath(Root, current, current.last, Option(Playing))
+    case Leaf(_, _, _) => {
+      MovePath(Root, current, Option(Playing)) #:: acc
     }
 
     case Node(f, _, _, _, _) => {
       if (children.isEmpty) {
-        acc :+ MovePath(Root, current.toStream, current.last, Option(Playing))
+        MovePath(Root, current, Option(Playing)) #:: acc
       } else {
-        val appended = current :+ f
+        val appended = f #:: current
         children.flatMap(c => findPathsFrom(c, c.nodes, appended, playerToWin, acc)) 
       }
+    }
+  }
+  
+  private def findPaths(startNode: GameTree, children: Stream[GameTree], 
+      current: Stream[Field], acc: Stream[MovePath]): Stream[MovePath] = children match {
+    case Stream.Empty => {
+      if (startNode.nodes.isEmpty) {
+//        println("End Path!");
+//        println("=========");
+//      
+//        val p = startNode.field #:: current
+//      
+//        p.foreach(f => println(f.toString))
+      
+        MovePath(startNode, startNode.field #:: current, Option(Playing)) #:: acc
+      } else {
+        acc
+      }
+    }
+    case ch #:: tail => {
+      findPaths(ch, ch.nodes, startNode.field #:: current, acc) #::: findPaths(startNode, tail, current, acc)
     }
   }
   
@@ -93,9 +121,9 @@ object GameTree {
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
       expectedStatuses: List[GameStatus]) : Stream[MovePath] = {
-	val allWinTiePaths = findPathsFrom(startNode, startNode.nodes, Stream.Empty, playerToWin, Stream.empty[MovePath])
+	val allPaths = findPaths(startNode, startNode.nodes, Stream.empty[Field], Stream.empty[MovePath])
     
-	allWinTiePaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
+	allPaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
   }
   
   def advice(startNode: GameTree, playerToWin: PlayerType) : MovePath = {
@@ -122,7 +150,7 @@ object GameTree {
     status == OWon || status == XWon || status == Tie
   
   private def isTreeCompleted(tree: GameTree): Boolean = tree match {
-    case Leaf(_, _) => true
+    case Leaf(_, _, _) => true
     case Node(_, _, ch, _, _) => {
       if (ch.isEmpty) false
       else ch.forall(isTreeCompleted(_))
@@ -149,7 +177,7 @@ object GameTree {
       tree match {
         case node@Node(e, par, ch, p, s) => {
           if (this.isGameOver(s)) {
-            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(s, Sink), p, Playing), level + 1, constraint)
+            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(e, s, Sink), p, Playing), level + 1, constraint)
           } else {
             val player = Player("Player", p, new RandomMoveStrategy())
 
@@ -164,7 +192,7 @@ object GameTree {
           }
         }
 
-        case Leaf(s, par) => Leaf(s, par)
+        case Leaf(e, s, par) => Leaf(e, s, par)
       }
     }
   }
@@ -190,7 +218,7 @@ object GameTree {
   }
 
   def print(tree: GameTree, startLevel: Int): Unit = tree match {
-    case Leaf(s, _) => println("Leaf => " + s)
+    case Leaf(_, s, _) => println("Leaf => " + s)
     case Node(e, _, ch, p, _) => {
       println("Level: " + startLevel)
       val field = e
@@ -201,7 +229,7 @@ object GameTree {
   }
 
   def printLevel(tree: GameTree, level: Int, targetLevel: Int): Unit = tree match {
-    case Leaf(s, _) => println("Leaf => " + s)
+    case Leaf(_, s, _) => println("Leaf => " + s)
     case Node(e, _, ch, p, _) => {
       if (level == targetLevel - 1) {
         println("Level: " + targetLevel)
