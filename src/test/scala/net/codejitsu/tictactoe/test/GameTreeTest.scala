@@ -187,7 +187,7 @@ class GameTreeTest {
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
 	      Player("O", O, new RandomMoveStrategy()))	  
 	  
-	  assertTrue(paths.exists(p => game.calculateStatus(p.moves.head) == Tie))
+	  assertTrue(paths.exists(p => game.calculateStatus(p.moves.last) == Tie))
 	}
 	
 	@Test

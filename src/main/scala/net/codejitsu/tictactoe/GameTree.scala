@@ -2,7 +2,6 @@ package net.codejitsu.tictactoe
 
 import scala.collection.immutable.Stream.consWrapper
 import scala.collection.mutable.ListBuffer
-
 import net.codejitsu.tictactoe.GameStatus.GameStatus
 import net.codejitsu.tictactoe.GameStatus.NotStarted
 import net.codejitsu.tictactoe.GameStatus.OWon
@@ -12,6 +11,7 @@ import net.codejitsu.tictactoe.GameStatus.XWon
 import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
+import scala.annotation.tailrec
 
 sealed trait GameTree {
   def nextPlayer: PlayerType
@@ -97,13 +97,6 @@ object GameTree {
       current: Stream[Field], acc: Stream[MovePath]): Stream[MovePath] = children match {
     case Stream.Empty => {
       if (startNode.nodes.isEmpty) {
-//        println("End Path!");
-//        println("=========");
-//      
-//        val p = startNode.field #:: current
-//      
-//        p.foreach(f => println(f.toString))
-      
         MovePath(startNode, startNode.field #:: current, Option(Playing)) #:: acc
       } else {
         acc
@@ -114,6 +107,26 @@ object GameTree {
     }
   }
   
+  @tailrec
+  private def findPathsMap(startNode: GameTree, children: Stream[GameTree], 
+      acc: List[List[Field]]): List[List[Field]] = children match {
+    case Stream.Empty => acc
+    case all@(x #:: tail) => {
+      val last = acc.find(p => p.last.field == startNode.field.field).getOrElse(List())
+      
+      if (last.isEmpty) {
+        val allFields = all.map(_.field).toList.map(last :+ _)
+        findPathsMap(x, x.nodes, acc ::: allFields)
+      } else {
+    	val index = acc.indexOf(last)
+        val removed = acc.drop(index)
+        val allFields = all.map(_.field).toList.map(last :+ _)
+        
+        findPathsMap(startNode, tail, removed ::: allFields)
+      }
+    }
+  }
+  
   def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
     val expectedStatuses = if (playerToWin == X) List(XWon, Tie) else List(OWon, Tie)
     allAdvicesWithStatus(startNode, playerToWin, expectedStatuses)
@@ -121,9 +134,19 @@ object GameTree {
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
       expectedStatuses: List[GameStatus]) : Stream[MovePath] = {
-	val allPaths = findPaths(startNode, startNode.nodes, Stream.empty[Field], Stream.empty[MovePath])
+	//val allPaths = findPaths(startNode, startNode.nodes, Stream.empty[Field], Stream.empty[MovePath])
     
-	allPaths.filter(p => expectedStatuses.contains(p.status.getOrElse(Playing)))   
+    val t = findPathsMap(startNode, startNode.nodes, List())
+    
+    for(p <- t) {
+      println("path:")
+      println("=====")
+      
+      p.map(m => println(m.toString))
+    }
+     
+    val allPaths = t.map(t => MovePath(Root, t.toStream, Option(Playing))).toStream
+	allPaths.filter(p => expectedStatuses.contains(game.calculateStatus(p.moves.last)))   
   }
   
   def advice(startNode: GameTree, playerToWin: PlayerType) : MovePath = {
