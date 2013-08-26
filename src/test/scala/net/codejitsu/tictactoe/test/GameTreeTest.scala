@@ -1,8 +1,6 @@
 package net.codejitsu.tictactoe.test
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
+import org.junit.Assert._
 import org.junit.Test
 import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.FieldSize
@@ -182,12 +180,12 @@ class GameTreeTest {
 	@Test
 	def winPathsContainTie() {
 	  val tree = buildTree(GameTree.start, 1)
-	  val paths = GameTree.allAdvices(tree, X)
+	  val paths = GameTree.allAdvicesWithStatus(tree, X, List(Tie))
 	  
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
 	      Player("O", O, new RandomMoveStrategy()))	  
 	  
-	  assertTrue(paths.exists(p => game.calculateStatus(p.moves.last) == Tie))
+	  assertFalse(paths.isEmpty)
 	}
 	
 	@Test

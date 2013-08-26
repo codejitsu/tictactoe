@@ -113,6 +113,42 @@ object GameTree {
       }
     }
   }
+
+  def findPaths(currentNode: GameTree, children: Stream[GameTree],
+    currentPath: List[Field], paths: List[List[Field]]): List[List[Field]] = {
+    if (currentNode.nodes.isEmpty) {
+      currentPath :: paths
+    } else {
+      children match {
+        case Stream.Empty => {
+          paths
+        }
+        case x #:: tail => {
+          findPaths(x, x.nodes, x.field :: currentPath, paths) ::: findPaths(currentNode, tail, currentPath, paths)
+        }
+      }
+    }
+  }
+  
+  def getAllLeafPaths(node: GameTree): List[List[Field]] = getAllLeafPathsFromList(List.empty[List[Field]], List.empty[Field], Stream(node))
+  
+  @tailrec
+  def getAllLeafPathsFromList(accPaths: List[List[Field]], current: List[Field], nodeList: Stream[GameTree]): List[List[Field]] = nodeList match {
+   case head #:: tail => head match {
+      case Node(f, p, ch, _, _) => {
+    	if (ch.isEmpty) {
+    	  getAllLeafPathsFromList(current :: accPaths, List.empty[Field], tail)
+    	} else {
+          getAllLeafPathsFromList(accPaths, head.field :: current, ch #::: tail)
+    	}
+      }
+      case Leaf(f, g, par) => {
+        getAllLeafPathsFromList(current :: accPaths, List.empty[Field], tail)
+      }
+    }
+   
+    case _ => accPaths    
+  }
   
   def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
     val expectedStatuses = if (playerToWin == X) List(XWon, Tie) else List(OWon, Tie)
@@ -121,9 +157,10 @@ object GameTree {
   
   def allAdvicesWithStatus(startNode: GameTree, playerToWin: PlayerType, 
       expectedStatuses: List[GameStatus]) : Stream[MovePath] = {
-    val allPaths = findPathsMap(startNode, startNode.nodes, List()).map(t => MovePath(Root, t.toStream, Option(Playing))).toStream
-     
-	allPaths.filter(p => expectedStatuses.contains(game.calculateStatus(p.moves.last)))   
+   // val allPaths = findPaths(startNode, startNode.nodes, List(), List()).map(t => MovePath(Root, t.toStream, Option(Playing))).toStream
+    val allPaths = getAllLeafPaths(startNode).map(t => MovePath(Root, t.toStream, Option(Playing))).toStream
+    
+	allPaths.filter(p => expectedStatuses.contains(game.calculateStatus(p.moves.head)))   
   }
   
   def advice(startNode: GameTree, playerToWin: PlayerType) : MovePath = {
