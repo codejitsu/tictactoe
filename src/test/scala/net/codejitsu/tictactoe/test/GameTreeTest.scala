@@ -196,6 +196,12 @@ class GameTreeTest {
 	  val paths = GameTree.allAdvicesWithStatus(tree, X, List(NotStarted, Playing, XWon, OWon, Tie))
 	  
 	  assertEquals(6, paths.length)	  
+	  
+	  for(p <- paths) {
+	    println("Path:" + p.moves.size);
+	    println("=====");
+	    p.moves.reverse.foreach(m => println(m.toString))
+	  }
 	}
 	
 	def generateWinPath(start: GameTree, playerToWin: PlayerType): MovePath = {

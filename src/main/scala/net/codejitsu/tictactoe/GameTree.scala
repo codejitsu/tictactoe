@@ -130,24 +130,53 @@ object GameTree {
     }
   }
   
-  def getAllLeafPaths(node: GameTree): List[List[Field]] = getAllLeafPathsFromList(List.empty[List[Field]], List.empty[Field], Stream(node))
+  def getAllLeafPaths(node: GameTree): List[List[Field]] = getAllLeafPathsFromList(List.empty[List[Field]], List(node.field), node.nodes)
   
   @tailrec
-  def getAllLeafPathsFromList(accPaths: List[List[Field]], current: List[Field], nodeList: Stream[GameTree]): List[List[Field]] = nodeList match {
+  def getAllLeafPathsFromList(accPaths: List[List[Field]], current: List[Field], children: Stream[GameTree]): List[List[Field]] = children match {
    case head #:: tail => head match {
       case Node(f, p, ch, _, _) => {
+        println("Element:");
+        println(f.toString);
+        println("Element->Parent:");
+        println(p.field.toString);
+
+        println("Current.Head:");
+        println(current.head.toString);
+        
     	if (ch.isEmpty) {
-    	  getAllLeafPathsFromList(current :: accPaths, List.empty[Field], tail)
+          //LEAF
+    	  
+    	  println("> Leaf");
+    	  
+    	  println("Parent -> children size: " + p.nodes.length);
+    	  
+    	  if (head.parent.field != current.head) {
+    	    println("Current tree completed! Go back.");
+    	    getAllLeafPathsFromList((head.field :: current) :: accPaths, current.tail, tail)
+    	  } else {
+    	    println("Current tree not completed yet.");
+    	    getAllLeafPathsFromList((head.field :: current) :: accPaths, current, tail)
+    	  }
     	} else {
-          getAllLeafPathsFromList(accPaths, head.field :: current, ch #::: tail)
+    	  //NODE
+    	  
+    	  println("> Node");
+    	  if (head.parent.field != current.head || p.nodes.size == 1) {
+            println("Current tree completed! Go back.");
+    	    getAllLeafPathsFromList(accPaths, head.field :: current.tail, ch #::: tail)
+    	  } else {
+    	    println("Current tree not completed yet.");
+    	    getAllLeafPathsFromList(accPaths, head.field :: current, ch #::: tail)
+    	  }
     	}
       }
       case Leaf(f, g, par) => {
-        getAllLeafPathsFromList(current :: accPaths, List.empty[Field], tail)
+        getAllLeafPathsFromList((head.field :: current) :: accPaths, current.tail, tail)
       }
     }
    
-    case _ => accPaths    
+    case Stream.Empty => accPaths    
   }
   
   def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
@@ -214,7 +243,7 @@ object GameTree {
       tree match {
         case node@Node(e, par, ch, p, s) => {
           if (this.isGameOver(s)) {
-            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(e, s, Sink), p, Playing), level + 1, constraint)
+            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(e, s, par), p, Playing), level + 1, constraint)
           } else {
             val player = Player("Player", p, new RandomMoveStrategy())
 
@@ -225,7 +254,7 @@ object GameTree {
             val children = fields.map(f => buildWithConstraint(Node(f, node, Stream.empty[GameTree], 
                 nextPl, this.game.calculateStatus(f)), level + 1, constraint))
 
-            Node(e, node, children, p, s)
+            Node(e, par, children, p, s)
           }
         }
 
