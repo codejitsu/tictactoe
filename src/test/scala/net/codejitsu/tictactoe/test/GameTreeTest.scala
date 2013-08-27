@@ -24,7 +24,7 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Node(e, _, ch, p, _) => assertTrue(ch.isEmpty)
+	    case Node(e, _, ch, p, _, _) => assertTrue(ch.isEmpty)
 	    case _ => fail()
 	  }
 	}
@@ -34,7 +34,7 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Node(e, _, _, _, _) => assertTrue(e.isEmpty)
+	    case Node(e, _, _, _, _, _) => assertTrue(e.isEmpty)
 	    case _ => fail()
 	  }
 	}
@@ -44,7 +44,7 @@ class GameTreeTest {
 	  val zeroLevel = GameTree.start
 	  
 	  zeroLevel match {
-	    case Node(_, _, _, p, _) => assertTrue(p == X)
+	    case Node(_, _, _, p, _, _) => assertTrue(p == X)
 	    case _ => fail()
 	  }
 	}	
@@ -54,8 +54,8 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  firstLevel match {
-	    case Leaf(_, _, _) => fail()
-	    case Node(e, _, ch, p, _) => {
+	    case Leaf(_, _, _, _) => fail()
+	    case Node(e, _, ch, p, _, _) => {
 	      assertTrue(!ch.isEmpty)
 	      assertEquals(FieldSize * FieldSize, ch.size)
 	    }
@@ -67,10 +67,10 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1)
 	  
 	  firstLevel match {
-	    case Leaf(_, _, _) => fail()
-	    case Node(e, _, ch, p, _) => {
+	    case Leaf(_, _, _, _) => fail()
+	    case Node(e, _, ch, p, _, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _, _) => fail()
+	    	  case Leaf(_, _, _, _) => fail()
 	    	  case _ => ()
 	    	})
 	    }
@@ -88,10 +88,10 @@ class GameTreeTest {
 	  val allFields = moves.map(m => fieldInit.update(Move(m._1, m._2, player))).map(_.toString)
 	  
 	  firstLevel match {
-	    case Leaf(_, _, _) => fail()
-	    case Node(e, _, ch, p, _) => {
+	    case Leaf(_, _, _, _) => fail()
+	    case Node(e, _, ch, p, _, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _, _) => fail()
+	    	  case Leaf(_, _, _, _) => fail()
 	    	  case x => allFields.contains(x.toString)
 	    	})
 	    	
@@ -105,11 +105,11 @@ class GameTreeTest {
 	  val secondLevel = GameTree.build(GameTree.start, 1)
 
 	  secondLevel match {
-	    case Leaf(_, _, _) => fail()
-	    case Node(e, _, ch, p, _) => {
+	    case Leaf(_, _, _, _) => fail()
+	    case Node(e, _, ch, p, _, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _, _) => fail()
-	    	  case Node(e2, _, ch2, p2, _) => {
+	    	  case Leaf(_, _, _, _) => fail()
+	    	  case Node(e2, _, ch2, p2, _, _) => {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
 	    	  }
@@ -123,11 +123,11 @@ class GameTreeTest {
 	  val firstLevel = GameTree.build(GameTree.start, 1)
 
 	  firstLevel match {
-	    case Leaf(_, _, _) => fail()
-	    case Node(e, _, ch, p, _) => {
+	    case Leaf(_, _, _, _) => fail()
+	    case Node(e, _, ch, p, _, _) => {
 	    	ch.foreach(c => c match {
-	    	  case Leaf(_, _, _) => fail()
-	    	  case Node(e2, _, ch2, p2, _) => {
+	    	  case Leaf(_, _, _, _) => fail()
+	    	  case Node(e2, _, ch2, p2, _, _) => {
 	    		  assertTrue(!ch2.isEmpty)
 	    		  assertEquals(FieldSize * FieldSize - 1, ch2.size)
 	    		  
