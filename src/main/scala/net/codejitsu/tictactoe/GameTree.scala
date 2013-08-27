@@ -85,83 +85,38 @@ object GameTree {
 
   def getAllLeafPaths(node: GameTree): List[List[GameTree]] = 
     getAllLeafPathsFromList(List.empty[List[GameTree]], List(node), node.nodes)
-  
+
   @tailrec
-  def getAllLeafPathsFromList(accPaths: List[List[GameTree]], current: List[GameTree], 
-      children: Stream[GameTree]): List[List[GameTree]] = children match {
-   case head #:: tail => head match {
-      case node@Node(f, p, ch, _, _, id) => {
-        println("Current node: {" + id + "} is Leaf: " + ch.isEmpty)
-        println("-------------")
-        println(f.toString)
-        
-        println()
-        
-        println("Current path:")
-        println("-------------")
-        current.foreach(x => println("id: " + x.id + "\n" + x.field.toString))
-        
-        println()
-        
-        println("Children:")
-        println("---------")
-        
-        val x = children.map(_.id)
-        
-        println(x.foldLeft("")(_ + " " + _))
-        
-    	if (ch.isEmpty) {
-    	    val path = node :: current
+  def getAllLeafPathsFromList(accPaths: List[List[GameTree]], current: List[GameTree],
+    children: Stream[GameTree]): List[List[GameTree]] = children match {
+    case head #:: tail => head match {
+      case node @ Node(f, p, ch, _, _, id) => {
+        if (ch.isEmpty) {
+          val path = node :: current
 
-    	    if (children.size > 1 && !current.isEmpty && tail.head.parent.id != current.head.id) {
-    	      println("current.head.id: " + current.head.id);
-    	      println("tail.head.parent.id: " + tail.head.parent.id);
-    	      
-    	      println()
-    	      println("This subtree completed, change to next.")
-
-    	      val newCurrent = current.dropWhile(p => p.id != tail.head.parent.id)
-    	      
-    	      println("Drop current:");
-    	      println("-------------")
-    	      newCurrent.foreach(x => println(x.field.toString))
-    	      
-    	      getAllLeafPathsFromList(path :: accPaths, newCurrent, tail)
-    	    } else {
-    	      println()
-    	      println("This subtree NOT completed, move to next node.")
-
-    	      getAllLeafPathsFromList(path :: accPaths, current, tail)
-    	    }
-    	} else {
-          if (!tail.isEmpty && !current.isEmpty && tail.head.parent.id != current.head.id) {
-            println("tail.head.parent.id: " + tail.head.parent.id);
-            println("current.head.id: " + current.head.id);
-        	  
-            println()
-            println("This subtree completed, change to next.")
-
-            val newCurrent = node :: current//.dropWhile(p => p.id != tail.head.parent.id)
-
-            println("Drop current:");
-            println("-------------")
-            newCurrent.foreach(x => println(x.field.toString))
-
-            getAllLeafPathsFromList(accPaths, newCurrent, ch #::: tail)
-    	  } else {
-    	    println()
-    	    println("This subtree NOT completed, move to next node.")
-    	    
-    	    getAllLeafPathsFromList(accPaths, node :: current, ch #::: tail)
-    	  }
-    	}
+          if (children.size > 1 && !current.isEmpty && tail.head.parent.id != current.head.id) {
+            val dropped_current = current.dropWhile(p => p.id != tail.head.parent.id)
+            getAllLeafPathsFromList(path :: accPaths, dropped_current, tail)
+          } else {
+            getAllLeafPathsFromList(path :: accPaths, current, tail)
+          }
+        } else {
+          getAllLeafPathsFromList(accPaths, node :: current, ch #::: tail)
+        }
       }
-      case leaf@Leaf(f, g, par, _) => {
-        getAllLeafPathsFromList((leaf :: current) :: accPaths, current.tail, tail)
+      case leaf @ Leaf(f, g, par, _) => {
+        val path = leaf :: current
+
+        if (children.size > 1 && !current.isEmpty && tail.head.parent.id != current.head.id) {
+          val dropped_current = current.dropWhile(p => p.id != tail.head.parent.id)
+          getAllLeafPathsFromList(path :: accPaths, dropped_current, tail)
+        } else {
+          getAllLeafPathsFromList(path :: accPaths, current, tail)
+        }
       }
     }
-   
-    case Stream.Empty => accPaths    
+
+    case Stream.Empty => accPaths
   }
   
   def allAdvices(startNode: GameTree, playerToWin: PlayerType) : Stream[MovePath] = {
