@@ -51,7 +51,7 @@ class GameTreeTest {
 	
 	@Test
 	def firstLevelIsNotEmptyConsistsOfNineElements() {
-	  val firstLevel = GameTree.build(GameTree.start, 1)
+	  val firstLevel = GameTree.build(GameTree.start)
 	  
 	  firstLevel match {
 	    case Leaf(_, _, _, _) => fail()
@@ -64,7 +64,7 @@ class GameTreeTest {
 	
 	@Test
 	def firstLevelAllElementsAreNodes() {
-	  val firstLevel = GameTree.build(GameTree.start, 1)
+	  val firstLevel = GameTree.build(GameTree.start)
 	  
 	  firstLevel match {
 	    case Leaf(_, _, _, _) => fail()
@@ -79,7 +79,7 @@ class GameTreeTest {
 	
 	@Test
 	def firstLevelContainsAllCorrectMoves() {
-	  val firstLevel = GameTree.build(GameTree.start, 1)
+	  val firstLevel = GameTree.build(GameTree.start)
 	  
 	  val fieldInit = Field()
 	  val player = Player("Player", X, new RandomMoveStrategy)
@@ -102,7 +102,7 @@ class GameTreeTest {
 	
 	@Test
 	def eachNodeOnSecondLevelHasEightChildren() {
-	  val secondLevel = GameTree.build(GameTree.start, 1)
+	  val secondLevel = GameTree.build(GameTree.start)
 
 	  secondLevel match {
 	    case Leaf(_, _, _, _) => fail()
@@ -120,7 +120,7 @@ class GameTreeTest {
 
 	@Test
 	def secondLevelContainsAllCorrectMoves() {
-	  val firstLevel = GameTree.build(GameTree.start, 1)
+	  val firstLevel = GameTree.build(GameTree.start)
 
 	  firstLevel match {
 	    case Leaf(_, _, _, _) => fail()
@@ -144,13 +144,13 @@ class GameTreeTest {
 	
 	@Test
 	def generateCompleteTree() {
-	  val tree = buildTree(GameTree.start, 1)
+	  val tree = buildTree(GameTree.start)
 	}
 	
 	@Test
 	@Ignore
 	def testAdviceXWonOrTie() {
-	  val tree = buildTree(GameTree.start, 1)
+	  val tree = buildTree(GameTree.start)
 	  val path = generateWinPath(tree, X)
 	  
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
@@ -164,7 +164,7 @@ class GameTreeTest {
 	@Test
 	@Ignore
 	def testAdviceOWonOrTie() {
-	  val tree = buildTree(GameTree.start, 1)
+	  val tree = buildTree(GameTree.start)
 	  val path = generateWinPath(tree, O)
 	  
 	  assertTrue(path.moves.size > 5)
@@ -179,7 +179,7 @@ class GameTreeTest {
 	
 	@Test
 	def winPathsContainTie() {
-	  val tree = buildTree(GameTree.start, 1)
+	  val tree = buildTree(GameTree.start)
 	  val paths = GameTree.allAdvicesWithStatus(tree, X, List(Tie))
 	  
 	  val game = Game(Player("X", X, new RandomMoveStrategy()), 
@@ -191,7 +191,7 @@ class GameTreeTest {
 	@Test
 	def generateTreeWithConstraint() {
 	  val moves =  List((0, 0), (0, 1), (0, 2))
-	  val tree = buildTreeWithConstraint(GameTree.start, 1, moves)
+	  val tree = buildTreeWithConstraint(GameTree.start, moves)
 	  
 	  val paths = GameTree.allAdvicesWithStatus(tree, X, List(NotStarted, Playing, XWon, OWon, Tie))
 	  
@@ -212,11 +212,11 @@ class GameTreeTest {
 	  moves.filter(m => m._1 != xmove._2 && m._2 != xmove._3).map(m => field.update(Move(m._1, m._2, player)))	  
 	}
 	
-	def buildTreeWithConstraint(tree: GameTree, level: Int, constraint: List[(Int, Int)]): GameTree = {
-	  GameTree.buildWithConstraint(tree, 1, constraint)
+	def buildTreeWithConstraint(tree: GameTree, constraint: List[(Int, Int)]): GameTree = {
+	  GameTree.buildWithConstraint(tree, constraint)
 	}
 	
-	def buildTree(tree: GameTree, level: Int): GameTree = {
-	    GameTree.build(tree, 1)
+	def buildTree(tree: GameTree): GameTree = {
+	    GameTree.build(tree)
 	}
 }

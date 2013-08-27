@@ -39,7 +39,7 @@ case class Node(e: Field, par: GameTree, children: Stream[GameTree], nextPlayer:
   def toList = e :: children.foldLeft(List[Field]())(_ ::: _.toList)
   def mkString = "===" + "\n" + e.toString + "\n" + children.map(_.mkString).foldLeft("")(_ + _)
   lazy val nodes = children
-  def status = gameStatus
+  lazy val status = gameStatus
   def parent = par
   def field = e
 }
@@ -94,7 +94,12 @@ object GameTree {
         if (ch.isEmpty) {
           val path = node :: current
 
-          if (children.size > 1 && !current.isEmpty && tail.head.parent.id != current.head.id) {
+          val moreThanTwo = tail match {
+            case x #:: xxx => true
+            case _ => false
+          }
+
+          if (moreThanTwo && !current.isEmpty && tail.head.parent.id != current.head.id) {
             val dropped_current = current.dropWhile(p => p.id != tail.head.parent.id)
             getAllLeafPathsFromList(path :: accPaths, dropped_current, tail)
           } else {
@@ -107,7 +112,12 @@ object GameTree {
       case leaf @ Leaf(f, g, par, _) => {
         val path = leaf :: current
 
-        if (children.size > 1 && !current.isEmpty && tail.head.parent.id != current.head.id) {
+        val moreThanTwo = tail match {
+          case x #:: xxx => true
+          case _ => false
+        }
+        
+        if (moreThanTwo && !current.isEmpty && tail.head.parent.id != current.head.id) {
           val dropped_current = current.dropWhile(p => p.id != tail.head.parent.id)
           getAllLeafPathsFromList(path :: accPaths, dropped_current, tail)
         } else {
@@ -164,30 +174,29 @@ object GameTree {
     }
   }  
     
-  def build(tree: GameTree, level: Int) = {
+  def build(tree: GameTree) = {
     this.leafsOWon.clear()
     this.leafsXWon.clear()
     this.leafsTie.clear()
     
     this.startId = 0
-    
-    buildWithConstraint(tree, level, this.all_moves)
+
+    buildWithConstraint(tree, this.all_moves)
+//    val player = Player("Player", tree.nextPlayer, new RandomMoveStrategy())
+//    val fields = collectFields(tree.field, player, List.empty[Field], this.all_moves)    
+//    
+//    buildWithConstraintRec(this.all_moves, fields, tree)
   }
   
-  def buildWithConstraint(tree: GameTree, level: Int,
-      constraint: List[(Int, Int)]): GameTree = {
+  def buildWithConstraint(tree: GameTree, constraint: List[(Int, Int)]): GameTree = {
     if (isTreeCompleted(tree)) {
-      if (tree.status == XWon) this.leafsXWon += tree
-      if (tree.status == OWon) this.leafsOWon += tree
-      if (tree.status == Tie) this.leafsTie += tree
-      
       tree
     } else {
       tree match {
         case node@Node(e, par, ch, p, s, i) => {
           if (this.isGameOver(s)) {
             startId = startId + 1
-            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(e, s, par, startId), p, Playing, i), level + 1, constraint)
+            buildWithConstraint(Node(e, par, Stream.empty[GameTree] :+ Leaf(e, s, par, startId), p, Playing, i), constraint)
           } else {
             val player = Player("Player", p, new RandomMoveStrategy())
 
@@ -202,7 +211,7 @@ object GameTree {
             val withid = fields.zip(idrange)
             
             val children = withid.map(w => buildWithConstraint(Node(w._1, node, Stream.empty[GameTree], 
-                nextPl, this.game.calculateStatus(w._1), w._2), level + 1, constraint))
+                nextPl, this.game.calculateStatus(w._1), w._2), constraint))
 
             Node(e, par, children, p, s, i)
           }
@@ -213,6 +222,32 @@ object GameTree {
     }
   }
 
+  @tailrec
+  def buildWithConstraintRec(constraint: List[(Int, Int)], nodes: List[Field], currentTree: GameTree): GameTree = nodes match {
+    case head :: tail => currentTree match {
+      case node@Node(f, par, children, next, gameStatus, id) => {
+       if (this.isGameOver(gameStatus)) {
+         startId = startId + 1
+         node.copy(children = Leaf(head, gameStatus, node, startId) #:: children)
+       } else {
+         val player = Player("Player", next, new RandomMoveStrategy())
+         val fields = collectFields(f, player, List.empty[Field], constraint)
+         val nextPl = nextPlayer(next)         
+         
+         startId = startId + 1
+         val nextNode = Node(head, node, Stream.Empty, nextPl, gameStatus, startId)
+         
+         val updated = node.copy(children = nextNode #:: children)
+         
+         buildWithConstraintRec(constraint, fields, updated)
+       }
+      }
+      case Leaf(f, gameStatus, par, id) => currentTree
+    }
+    
+    case _ => currentTree
+  }
+  
   private def collectFields(parentField: Field, player: Player, 
       acc: List[Field], moves: List[(Int, Int)]): List[Field] = moves match {
     case Nil => acc
