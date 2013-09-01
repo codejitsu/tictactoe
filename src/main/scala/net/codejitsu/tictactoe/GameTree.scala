@@ -55,17 +55,6 @@ object Root extends GameTree {
   val id = 0
 }
 
-object Sink extends GameTree {
-  def nextPlayer = null
-  def toList = Nil
-  def mkString = "-"
-  val nodes = Stream.Empty
-  def status = NotStarted
-  def parent = Sink  
-  def field = Field()
-  val id = -1
-}
-
 case class MovePath(start: GameTree, moves: Stream[Field], status: Option[GameStatus])
 object EmptyPath extends MovePath(Root, Stream.empty[Field], Option(Playing))
 
@@ -182,10 +171,6 @@ object GameTree {
     this.startId = 0
 
     buildWithConstraint(tree, this.all_moves)
-//    val player = Player("Player", tree.nextPlayer, new RandomMoveStrategy())
-//    val fields = collectFields(tree.field, player, List.empty[Field], this.all_moves)    
-//    
-//    buildWithConstraintRec(this.all_moves, fields, tree)
   }
   
   def buildWithConstraint(tree: GameTree, constraint: List[(Int, Int)]): GameTree = {
@@ -220,32 +205,6 @@ object GameTree {
         case Leaf(e, s, par, i) => Leaf(e, s, par, i)
       }
     }
-  }
-
-  @tailrec
-  def buildWithConstraintRec(constraint: List[(Int, Int)], nodes: List[Field], currentTree: GameTree): GameTree = nodes match {
-    case head :: tail => currentTree match {
-      case node@Node(f, par, children, next, gameStatus, id) => {
-       if (this.isGameOver(gameStatus)) {
-         startId = startId + 1
-         node.copy(children = Leaf(head, gameStatus, node, startId) #:: children)
-       } else {
-         val player = Player("Player", next, new RandomMoveStrategy())
-         val fields = collectFields(f, player, List.empty[Field], constraint)
-         val nextPl = nextPlayer(next)         
-         
-         startId = startId + 1
-         val nextNode = Node(head, node, Stream.Empty, nextPl, gameStatus, startId)
-         
-         val updated = node.copy(children = nextNode #:: children)
-         
-         buildWithConstraintRec(constraint, fields, updated)
-       }
-      }
-      case Leaf(f, gameStatus, par, id) => currentTree
-    }
-    
-    case _ => currentTree
   }
   
   private def collectFields(parentField: Field, player: Player, 
