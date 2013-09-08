@@ -4,24 +4,30 @@ trait Tree[+A] {
   import scala.annotation.tailrec
 
   def value: Option[A] = this match {
-    case n: Node[A] => Some(n.v)
+    case n: Fork[A] => Some(n.v)
     case l: Leaf[A] => Some(l.v)
     case Empty => None
   }
 
-  def left: Option[Tree[A]] = this match {
-    case n: Node[A] => Some(n.l)
+  def sub(i: Int): Option[Tree[A]] = this match {
+    case n: Fork[A] => Some(n.ch(i))
     case l: Leaf[A] => None
     case Empty => None
   }
-
-  def right: Option[Tree[A]] = this match {
-    case n: Node[A] => Some(n.r)
+  
+  def isEmpty: Boolean = this match {
+    case n: Fork[A] => false
+    case l: Leaf[A] => true
+    case Empty => true    
+  }
+  
+  def children: Option[List[Tree[A]]] = this match {
+    case n: Fork[A] => Some(n.ch.toList)
     case l: Leaf[A] => None
-    case Empty => None
+    case Empty => None    
   }
 }
 
-case class Node[A](v: A, l: Tree[A], r: Tree[A]) extends Tree[A]
+case class Fork[A](v: A, ch: Tree[A]*) extends Tree[A]
 case class Leaf[A](v: A) extends Tree[A]
 case object Empty extends Tree[Nothing]
