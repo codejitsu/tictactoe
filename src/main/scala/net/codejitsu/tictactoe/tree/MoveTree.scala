@@ -82,15 +82,26 @@ object MoveTree {
     case n :: xn => {
       lazy val nextPl = nextPlayer(node.value.get.player)
       
-      lazy val nextLevel = Fork(Step(n, nextPl))
-   
-      lazy val nextFields = fields.get(n).get
-      
-      lazy val nextTree = make2(possibleMoves, nextLevel, nextFields, fields)
-      
-      lazy val fork = Fork(node.value.get, (node.children.get :+ nextTree): _*)
-      
-      make(possibleMoves, fork, xn, fields)
+      lazy val isOver = isGameOver(n)
+
+      if (!isOver) {
+        lazy val nextLevel = Fork(Step(n, nextPl))
+
+        lazy val nextFields = fields.get(n).get
+
+        lazy val nextTree = make2(possibleMoves, nextLevel, nextFields, fields)
+
+        lazy val step = node match {
+          case f: Fork[Step] => Fork(node.value.get, (node.children.get :+ nextTree): _*)
+          case l: Leaf[Step] => Leaf(node.value.get)
+        }
+        
+        make(possibleMoves, step, xn, fields)
+      } else {
+        lazy val nextLevel = Leaf(Step(n, nextPl))
+        
+        make(possibleMoves, nextLevel, xn, fields)
+      }
     }
   }
   
@@ -99,17 +110,28 @@ object MoveTree {
       node: Tree[Step], next: List[Field], fields: Map[Field, List[Field]]): Tree[Step] = next match {
     case Nil => node
     case n :: xn => {
-      lazy val nextPl = nextPlayer(node.value.get.player)
+     lazy val nextPl = nextPlayer(node.value.get.player)
       
-      lazy val nextLevel = Fork(Step(n, nextPl))
-      
-      lazy val nextFields = fields.get(n).get
-      
-      lazy val nextTree = make(possibleMoves, nextLevel, nextFields, fields)
-      
-      lazy val fork = Fork(node.value.get, (node.children.get :+ nextTree): _*)
-      
-      make2(possibleMoves, fork, xn, fields)
+      lazy val isOver = isGameOver(n)
+
+      if (!isOver) {
+        lazy val nextLevel = Fork(Step(n, nextPl))
+
+        lazy val nextFields = fields.get(n).get
+
+        lazy val nextTree = make(possibleMoves, nextLevel, nextFields, fields)
+
+        lazy val step = node match {
+          case f: Fork[Step] => Fork(node.value.get, (node.children.get :+ nextTree): _*)
+          case l: Leaf[Step] => Leaf(node.value.get)
+        }
+        
+        make2(possibleMoves, step, xn, fields)
+      } else {
+        lazy val nextLevel = Leaf(Step(n, nextPl))
+        
+        make2(possibleMoves, nextLevel, xn, fields)
+      }
     }
   }
   

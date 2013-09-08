@@ -12,6 +12,8 @@ import net.codejitsu.tictactoe.PlayerType
 import net.codejitsu.tictactoe.tree.Leaf
 import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.RandomMoveStrategy
+import scala.annotation.tailrec
+import scala.collection.immutable.HashSet
 
 class MoveTreeTest {
   @Test def testMoveTree() {
@@ -38,7 +40,13 @@ class MoveTreeTest {
     
     val start = System.currentTimeMillis
     val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)
-    println(System.currentTimeMillis - start)
+    
+    println("Total time (ms): " + (System.currentTimeMillis - start))
+    println()
+    
+    val leafs = allLeafs(List(tree), 0, HashSet.empty)
+    
+    println("Total # leafs: " + leafs._1 + " unique: " + leafs._2.size)
   }  
   
   def print(tree: Tree[Step], level: Int): Unit = tree match {
@@ -52,4 +60,17 @@ class MoveTreeTest {
       println(l.value.get.field.toString)
     }
   }
+  
+  @tailrec
+  private def allLeafs(tree: List[Tree[Step]], acc: Int, all: HashSet[Field]): (Int, HashSet[Field]) = tree match {
+    case Nil => (acc, all)
+    case x :: xn => x match {
+      case n: Fork[Step] => {
+        allLeafs(xn ::: n.children.get, acc, all)
+      }
+      case l: Leaf[Step] => {
+        allLeafs(xn, acc + 1, all + l.value.get.field)
+      }
+    }
+  }  
 }
