@@ -10,14 +10,18 @@ import net.codejitsu.tictactoe.tree.Fork
 import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.PlayerType
 import net.codejitsu.tictactoe.tree.Leaf
+import net.codejitsu.tictactoe.Player
+import net.codejitsu.tictactoe.RandomMoveStrategy
 
 class MoveTreeTest {
   @Test def testMoveTree() {
     val moves =  List((0, 0), (0, 1), (0, 2))
     
-    val collected = MoveTree.collect(Field(), PlayerType.X, Nil, moves)
+    val p = Player("Player", PlayerType.X, new RandomMoveStrategy())
     
-    val tree: Tree[Step] = MoveTree.make(moves, Fork[Step](Step(Field(), PlayerType.X)), collected)
+    val collected = MoveTree.collect(Field(), p, Nil, moves)
+    
+    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), collected)
     
     print(tree, 0)
   }
@@ -25,9 +29,11 @@ class MoveTreeTest {
   @Test def testFullMoveTree() {
     val moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
     
-    val collected = MoveTree.collect(Field(), PlayerType.X, Nil, moves)
+    val p = Player("Player", PlayerType.X, new RandomMoveStrategy())
     
-    val tree: Tree[Step] = MoveTree.make(moves, Fork[Step](Step(Field(), PlayerType.X)), collected)
+    val collected = MoveTree.collect(Field(), p, Nil, moves)
+    
+    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), collected)
     
     println(tree)
   }  

@@ -20,13 +20,12 @@ object MoveTree {
     Player("O", O, new RandomMoveStrategy))  
   
   @tailrec
-  def collect(field: Field, player: PlayerType, 
+  def collect(field: Field, player: Player, 
       acc: List[Field], moves: List[(Int, Int)]): List[Field] = moves match {
     case Nil => acc
     case x :: tail => {
       val (row, col) = x
-      val p = Player("Player", player, new RandomMoveStrategy())
-      val move = Move(row, col, p)
+      val move = Move(row, col, player)
 
       if (field.silentVerify(move)) {
         collect(field, player, field.update(move) :: acc, tail)
@@ -53,7 +52,8 @@ object MoveTree {
       case x :: rs => x match {
         case Fork(_) => {
           val n = trees.head
-          val next = collect(n.value.get.field, n.value.get.player, Nil, possibleMoves)
+          val p = Player("Player", n.value.get.player, new RandomMoveStrategy())
+          val next = collect(n.value.get.field, p, Nil, possibleMoves)
           val nextPl = nextPlayer(n.value.get.player)
 
           val nodes = next.map(node => isGameOver(node) match {
@@ -79,15 +79,17 @@ object MoveTree {
   def make(possibleMoves: List[(Int, Int)], node: Tree[Step], next: List[Field]): Tree[Step] = next match {
     case Nil => node
     case n :: xn => {
-      val nextPl = nextPlayer(node.value.get.player)
+      lazy val nextPl = nextPlayer(node.value.get.player)
       
-      val nextLevel = Fork[Step](Step(n, nextPl))
+      lazy val nextLevel = Fork(Step(n, nextPl))
    
-      val nextFields = collect(nextLevel.value.get.field, nextLevel.value.get.player, Nil, possibleMoves) 
+      lazy val p = Player("Player", nextLevel.value.get.player, new RandomMoveStrategy())
       
-      val nextTree = make2(possibleMoves, nextLevel, nextFields)
+      lazy val nextFields = collect(n, p, Nil, possibleMoves) 
       
-      val fork = Fork[Step](Step(node.value.get.field, node.value.get.player), (node.children.get :+ nextTree): _*)
+      lazy val nextTree = make2(possibleMoves, nextLevel, nextFields)
+      
+      lazy val fork = Fork(node.value.get, (node.children.get :+ nextTree): _*)
       
       make(possibleMoves, fork, xn)
     }
@@ -97,15 +99,17 @@ object MoveTree {
   def make2(possibleMoves: List[(Int, Int)], node: Tree[Step], next: List[Field]): Tree[Step] = next match {
     case Nil => node
     case n :: xn => {
-      val nextPl = nextPlayer(node.value.get.player)
+      lazy val nextPl = nextPlayer(node.value.get.player)
       
-      val nextLevel = Fork[Step](Step(n, nextPl))
+      lazy val nextLevel = Fork(Step(n, nextPl))
    
-      val nextFields = collect(nextLevel.value.get.field, nextLevel.value.get.player, Nil, possibleMoves) 
+      lazy val p = Player("Player", nextLevel.value.get.player, new RandomMoveStrategy())
       
-      val nextTree = make(possibleMoves, nextLevel, nextFields)
+      lazy val nextFields = collect(n, p, Nil, possibleMoves) 
       
-      val fork = Fork[Step](Step(node.value.get.field, node.value.get.player), (node.children.get :+ nextTree): _*)
+      lazy val nextTree = make(possibleMoves, nextLevel, nextFields)
+      
+      lazy val fork = Fork(node.value.get, (node.children.get :+ nextTree): _*)
       
       make2(possibleMoves, fork, xn)
     }
