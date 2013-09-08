@@ -19,9 +19,10 @@ class MoveTreeTest {
     
     val p = Player("Player", PlayerType.X, new RandomMoveStrategy())
     
-    val collected = MoveTree.collect(Field(), p, Nil, moves)
+    val firstLevel = MoveTree.collect(Field(), p, Nil, moves)
     
-    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), collected)
+    val allLevels = MoveTree.collectAll(List((Field(), PlayerType.X)), moves, Map.empty)
+    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)
     
     print(tree, 0)
   }
@@ -31,11 +32,13 @@ class MoveTreeTest {
     
     val p = Player("Player", PlayerType.X, new RandomMoveStrategy())
     
-    val collected = MoveTree.collect(Field(), p, Nil, moves)
+    val firstLevel = MoveTree.collect(Field(), p, Nil, moves)
     
-    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), collected)
+    val allLevels = MoveTree.collectAll(List((Field(), PlayerType.X)), moves, Map.empty)
     
-    println(tree)
+    val start = System.currentTimeMillis
+    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)
+    println(System.currentTimeMillis - start)
   }  
   
   def print(tree: Tree[Step], level: Int): Unit = tree match {

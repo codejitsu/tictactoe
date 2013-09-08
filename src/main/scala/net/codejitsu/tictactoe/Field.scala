@@ -23,10 +23,12 @@ case class Field(val field: List[(CellStatus, Int, Int)]) {
     else throw new IllegalStateException()
   }
 
-  def silentVerify(move: Move): Boolean = {
-    if (!field.exists(c => c._2 == move.row && c._3 == move.col)) true
+  def silentVerify(move: Move): Boolean = silentVerify(move.row, move.col)
+    
+  def silentVerify(row: Int, col: Int): Boolean = {
+    if (!field.exists(c => c._2 == row && c._3 == col)) true
     else false    
-  }
+  }  
   
   def verify(x: Int) = {
     if (x > FieldSize - 1 || x < 0) throw new IllegalArgumentException
@@ -74,6 +76,15 @@ case class Field(val field: List[(CellStatus, Int, Int)]) {
       case OccupiedByO => "O"
     }
   }
+
+  override def hashCode = 41 + this.toString.hashCode
+  override def equals(other: Any): Boolean = other match {
+    case that: Field => (
+      that.canEqual(this)
+      && this.toString == that.toString)
+    case _ => false
+  }
+  def canEqual(other: Any): Boolean = other.isInstanceOf[Field]  
 }
 
 object Field {
