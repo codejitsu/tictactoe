@@ -29,7 +29,7 @@ case class Game(val playerX: Player, val playerO: Player) {
     }
   }
 
-  def checkFieldSpace(field: Field, f: Int => Set[(CellStatus, Int, Int)]): GameStatus = {
+  def checkFieldSpace(field: Field, f: Int => Set[(CellStatus, Cell)]): GameStatus = {
     val space = List(0, 1, 2).map(f(_))
 
     val checkedSpace = space.map(allCellsOccupiedBySamePlayer _)
@@ -86,7 +86,7 @@ case class Game(val playerX: Player, val playerO: Player) {
     }
   }
 
-  def allCellsOccupiedBySamePlayer(cells: Set[(CellStatus, Int, Int)]): (Boolean, Option[CellStatus]) = {
+  def allCellsOccupiedBySamePlayer(cells: Set[(CellStatus, Cell)]): (Boolean, Option[CellStatus]) = {
     if (cells.size != FieldSize) {
       (false, None)
     } else {

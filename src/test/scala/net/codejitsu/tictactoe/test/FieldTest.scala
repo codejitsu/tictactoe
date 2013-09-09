@@ -8,6 +8,7 @@ import net.codejitsu.tictactoe.Move
 import net.codejitsu.tictactoe.PlayerType._
 import net.codejitsu.tictactoe.CellStatus._
 import net.codejitsu.tictactoe.RandomMoveStrategy
+import net.codejitsu.tictactoe.Cell
 
 class FieldTest {
 	@Test def initialFieldIsEmpty() {
@@ -21,8 +22,8 @@ class FieldTest {
 	  	val player = Player("Player 1", X, new RandomMoveStrategy())
 
 		val field = Field()
-		val fieldStep2 = field.update(Move(1, 1, player))
-		fieldStep2.update(Move(1, 1, player))
+		val fieldStep2 = field.update(Move(Cell(1, 1), player))
+		fieldStep2.update(Move(Cell(1, 1), player))
 	}
 	
 	@Test (expected = classOf[IllegalStateException]) 
@@ -30,8 +31,8 @@ class FieldTest {
 	  	val player = Player("Player 1", X, new RandomMoveStrategy())
 
 		val field = Field()
-		val fieldStep2 = field.update(Move(1, 1, player))
-		fieldStep2.update(Move(1, 1, Player("Player 1", O, new RandomMoveStrategy())))
+		val fieldStep2 = field.update(Move(Cell(1, 1), player))
+		fieldStep2.update(Move(Cell(1, 1), Player("Player 1", O, new RandomMoveStrategy())))
 	}	
 	
 	@Test def testFullRow() {
@@ -39,11 +40,12 @@ class FieldTest {
 	  	
 	  	val field = Field()
 	  	
-	  	val field1 = field.update(Move(0, 0, player))
-	  	val field2 = field1.update(Move(0, 1, player))	  	
-	    val field3 = field2.update(Move(0, 2, player))
+	  	val field1 = field.update(Move(Cell(0, 0), player))
+	  	val field2 = field1.update(Move(Cell(0, 1), player))	  	
+	    val field3 = field2.update(Move(Cell(0, 2), player))
 	    
-	    assertEquals(Set((OccupiedByX, 0, 0), (OccupiedByX, 0, 1), (OccupiedByX, 0, 2)), field3.getRow(0))
+	    assertEquals(Set((OccupiedByX, Cell(0, 0)), (OccupiedByX, Cell(0, 1)), (OccupiedByX, Cell(0, 2))), 
+	        field3.getRow(0))
 	}
 	
 	@Test def testFullColumn() {
@@ -51,11 +53,12 @@ class FieldTest {
 	  	
 	  	val field = Field()
 	  	
-	  	val field1 = field.update(Move(0, 1, player))
-	  	val field2 = field1.update(Move(1, 1, player))	  	
-	    val field3 = field2.update(Move(2, 1, player))
+	  	val field1 = field.update(Move(Cell(0, 1), player))
+	  	val field2 = field1.update(Move(Cell(1, 1), player))	  	
+	    val field3 = field2.update(Move(Cell(2, 1), player))
 	    
-	    assertEquals(Set((OccupiedByX, 0, 1), (OccupiedByX, 1, 1), (OccupiedByX, 2, 1)), field3.getColumn(1))
+	    assertEquals(Set((OccupiedByX, Cell(0, 1)), (OccupiedByX, Cell(1, 1)), (OccupiedByX, Cell(2, 1))), 
+	        field3.getColumn(1))
 	}	
 
 	@Test def testFirstDiagonal() {
@@ -63,11 +66,12 @@ class FieldTest {
 	  	
 	  	val field = Field()
 	  	
-	  	val field1 = field.update(Move(0, 0, player))
-	  	val field2 = field1.update(Move(1, 1, player))	  	
-	    val field3 = field2.update(Move(2, 2, player))
+	  	val field1 = field.update(Move(Cell(0, 0), player))
+	  	val field2 = field1.update(Move(Cell(1, 1), player))	  	
+	    val field3 = field2.update(Move(Cell(2, 2), player))
 	    
-	    assertEquals(Set((OccupiedByX, 0, 0), (OccupiedByX, 1, 1), (OccupiedByX, 2, 2)), field3.getFirstDiagonal())
+	    assertEquals(Set((OccupiedByX, Cell(0, 0)), (OccupiedByX, Cell(1, 1)), (OccupiedByX, Cell(2, 2))), 
+	        field3.getFirstDiagonal())
 	}	
 
 	@Test def testSecondDiagonal() {
@@ -75,11 +79,12 @@ class FieldTest {
 	  	
 	  	val field = Field()
 	  	
-	  	val field1 = field.update(Move(0, 2, player))
-	  	val field2 = field1.update(Move(1, 1, player))	  	
-	    val field3 = field2.update(Move(2, 0, player))
+	  	val field1 = field.update(Move(Cell(0, 2), player))
+	  	val field2 = field1.update(Move(Cell(1, 1), player))	  	
+	    val field3 = field2.update(Move(Cell(2, 0), player))
 	    
-	    assertEquals(Set((OccupiedByX, 0, 2), (OccupiedByX, 1, 1), (OccupiedByX, 2, 0)), field3.getSecondDiagonal())
+	    assertEquals(Set((OccupiedByX, Cell(0, 2)), (OccupiedByX, Cell(1, 1)), (OccupiedByX, Cell(2, 0))), 
+	        field3.getSecondDiagonal())
 	}		
 	
 	@Test (expected = classOf[IllegalArgumentException]) 

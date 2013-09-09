@@ -2,6 +2,7 @@ package net.codejitsu.tictactoe.test
 
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.Assert._
 import net.codejitsu.tictactoe.tree.Tree
 import net.codejitsu.tictactoe.tree.Step
 import net.codejitsu.tictactoe.tree.MoveTree
@@ -14,32 +15,20 @@ import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.RandomMoveStrategy
 import scala.annotation.tailrec
 import scala.collection.immutable.HashSet
+import net.codejitsu.tictactoe.Cell
 
 class MoveTreeTest {
   @Test def testMoveTree() {
-    val moves =  List((0, 0), (0, 1), (0, 2))
+    val cells =  List(Cell(0, 0), Cell(0, 1), Cell(0, 2))
     
-    val p = Player("Player", PlayerType.X, new RandomMoveStrategy())
+    val tree: Tree[Step] = MoveTree.build(cells = cells)
     
-    val firstLevel = MoveTree.collect(Field(), p, Nil, moves)
-    
-    val allLevels = MoveTree.collectAll(List((Field(), PlayerType.X)), moves, Map.empty)
-    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)
-    
-    print(tree, 0)
+    assertEquals(16, size(List(tree)))
   }
   
   @Test def testFullMoveTree() {
-    val moves = List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
-    
-    val p = Player("Player", PlayerType.X, new RandomMoveStrategy())
-    
-    val firstLevel = MoveTree.collect(Field(), p, Nil, moves)
-    
-    val allLevels = MoveTree.collectAll(List((Field(), PlayerType.X)), moves, Map.empty)
-    
     val start = System.currentTimeMillis
-    val tree: Tree[Step] = MoveTree.make(moves, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)
+    val tree: Tree[Step] = MoveTree.build()
     
     println("Total time (ms): " + (System.currentTimeMillis - start))
     println()
@@ -60,7 +49,7 @@ class MoveTreeTest {
       println(l.value.get.field.toString)
     }
   }
-  
+
   @tailrec
   private def allLeafs(tree: List[Tree[Step]], acc: Int, all: HashSet[Field]): (Int, HashSet[Field]) = tree match {
     case Nil => (acc, all)
@@ -72,5 +61,18 @@ class MoveTreeTest {
         allLeafs(xn, acc + 1, all + l.value.get.field)
       }
     }
-  }  
+  }
+  
+  @tailrec
+  private def size(tree: List[Tree[Step]], acc: Int = 0): Int = tree match {
+    case Nil => acc
+    case x :: xn => x match {
+      case n: Fork[Step] => {
+        size(xn ::: n.children.get, acc + 1)
+      }
+      case l: Leaf[Step] => {
+        size(xn, acc + 1)
+      }
+    }
+  }    
 }

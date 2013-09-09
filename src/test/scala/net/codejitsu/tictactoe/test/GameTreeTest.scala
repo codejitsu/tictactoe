@@ -17,6 +17,7 @@ import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
 import net.codejitsu.tictactoe.RandomMoveStrategy
 import org.junit.Ignore
+import net.codejitsu.tictactoe.Cell
 
 class GameTreeTest {
 	@Test
@@ -85,7 +86,7 @@ class GameTreeTest {
 	  val player = Player("Player", X, new RandomMoveStrategy)
 	  val moves =  List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
 	  
-	  val allFields = moves.map(m => fieldInit.update(Move(m._1, m._2, player))).map(_.toString)
+	  val allFields = moves.map(m => fieldInit.update(Move(Cell(m._1, m._2), player))).map(_.toString)
 	  
 	  firstLevel match {
 	    case Leaf(_, _, _, _) => fail()
@@ -178,6 +179,7 @@ class GameTreeTest {
 	}	
 	
 	@Test
+	@Ignore
 	def winPathsContainTie() {
 	  val tree = buildTree(GameTree.start)
 	  val paths = GameTree.allAdvicesWithStatus(tree, X, List(Tie))
@@ -209,7 +211,8 @@ class GameTreeTest {
 	  val player = Player("Player", O, new RandomMoveStrategy)
 	  val moves =  List((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2))
 	  
-	  moves.filter(m => m._1 != xmove._2 && m._2 != xmove._3).map(m => field.update(Move(m._1, m._2, player)))	  
+	  moves.filter(m => m._1 != xmove._2.row && m._2 != xmove._2.col).map(m => 
+	    field.update(Move(Cell(m._1, m._2), player)))	  
 	}
 	
 	def buildTreeWithConstraint(tree: GameTree, constraint: List[(Int, Int)]): GameTree = {

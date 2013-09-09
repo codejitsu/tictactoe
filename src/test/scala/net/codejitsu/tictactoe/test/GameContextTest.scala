@@ -11,6 +11,7 @@ import net.codejitsu.tictactoe.Field
 import net.codejitsu.tictactoe.Move
 import net.codejitsu.tictactoe.GameContext
 import net.codejitsu.tictactoe.PlayStrategy
+import net.codejitsu.tictactoe.Cell
 
 class GameControllerTest {
   @Test def initGameController() {
@@ -49,15 +50,15 @@ class GameControllerTest {
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
-    val field1 = field.update(Move(0, 0, playerOne))
-    val field2 = field1.update(Move(0, 2, playerTwo))
-    val field3 = field2.update(Move(0, 1, playerOne))
-    val field4 = field3.update(Move(1, 0, playerTwo))
-    val field5 = field4.update(Move(1, 2, playerOne))
-    val field6 = field5.update(Move(1, 1, playerTwo))
-    val field7 = field6.update(Move(2, 0, playerOne))
-    val field8 = field7.update(Move(2, 2, playerTwo))
-    val field9 = field8.update(Move(2, 1, playerOne))
+    val field1 = field.update(Move(Cell(0, 0), playerOne))
+    val field2 = field1.update(Move(Cell(0, 2), playerTwo))
+    val field3 = field2.update(Move(Cell(0, 1), playerOne))
+    val field4 = field3.update(Move(Cell(1, 0), playerTwo))
+    val field5 = field4.update(Move(Cell(1, 2), playerOne))
+    val field6 = field5.update(Move(Cell(1, 1), playerTwo))
+    val field7 = field6.update(Move(Cell(2, 0), playerOne))
+    val field8 = field7.update(Move(Cell(2, 2), playerTwo))
+    val field9 = field8.update(Move(Cell(2, 1), playerOne))
 
     val tie = context._2.move(field9)
 
@@ -68,11 +69,11 @@ class GameControllerTest {
   @Test(expected = classOf[ArithmeticException])
   def onErrorCalled() {
     val playerOne = Player("Player 1", X, new PlayStrategy {
-      def makeMove(field: Field, player: Player): Move = Move(0, 0, player)
+      def makeMove(field: Field, player: Player): Move = Move(Cell(0, 0), player)
     })
     
     val playerTwo = Player("Player 2", O, new PlayStrategy {
-      def makeMove(field: Field, player: Player): Move = Move(0, 0, player)
+      def makeMove(field: Field, player: Player): Move = Move(Cell(0, 0), player)
     })
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start()
@@ -132,15 +133,15 @@ class GameControllerTest {
 
     val field = Field()
 
-    val field1 = field.update(Move(0, 0, playerOne))
+    val field1 = field.update(Move(Cell(0, 0), playerOne))
 
-    val field2 = field1.update(Move(1, 1, playerTwo))
+    val field2 = field1.update(Move(Cell(1, 1), playerTwo))
 
-    val field3 = field2.update(Move(0, 1, playerOne))
+    val field3 = field2.update(Move(Cell(0, 1), playerOne))
 
-    val field4 = field3.update(Move(2, 2, playerTwo))
+    val field4 = field3.update(Move(Cell(2, 2), playerTwo))
 
-    val field5 = field4.update(Move(0, 2, playerOne))
+    val field5 = field4.update(Move(Cell(0, 2), playerOne))
 
     val gameOverXWon = context._2.move(field5)
 
@@ -155,11 +156,11 @@ class GameControllerTest {
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
-    val field1 = field.update(Move(0, 0, playerOne))
-    val field2 = field1.update(Move(1, 1, playerTwo))
-    val field3 = field2.update(Move(1, 0, playerOne))
-    val field4 = field3.update(Move(2, 2, playerTwo))
-    val field5 = field4.update(Move(2, 0, playerOne))
+    val field1 = field.update(Move(Cell(0, 0), playerOne))
+    val field2 = field1.update(Move(Cell(1, 1), playerTwo))
+    val field3 = field2.update(Move(Cell(1, 0), playerOne))
+    val field4 = field3.update(Move(Cell(2, 2), playerTwo))
+    val field5 = field4.update(Move(Cell(2, 0), playerOne))
 
     val gameOverXWon = context._2.move(field5)
 
@@ -174,11 +175,11 @@ class GameControllerTest {
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
-    val field1 = field.update(Move(0, 0, playerOne))
-    val field2 = field1.update(Move(1, 0, playerTwo))
-    val field3 = field2.update(Move(1, 1, playerOne))
-    val field4 = field3.update(Move(0, 1, playerTwo))
-    val field5 = field4.update(Move(2, 2, playerOne))
+    val field1 = field.update(Move(Cell(0, 0), playerOne))
+    val field2 = field1.update(Move(Cell(1, 0), playerTwo))
+    val field3 = field2.update(Move(Cell(1, 1), playerOne))
+    val field4 = field3.update(Move(Cell(0, 1), playerTwo))
+    val field5 = field4.update(Move(Cell(2, 2), playerOne))
 
     val gameOverXWon = context._2.move(field5)
 
@@ -193,11 +194,11 @@ class GameControllerTest {
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
-    val field1 = field.update(Move(0, 2, playerOne))
-    val field2 = field1.update(Move(1, 0, playerTwo))
-    val field3 = field2.update(Move(1, 1, playerOne))
-    val field4 = field3.update(Move(0, 1, playerTwo))
-    val field5 = field4.update(Move(2, 0, playerOne))
+    val field1 = field.update(Move(Cell(0, 2), playerOne))
+    val field2 = field1.update(Move(Cell(1, 0), playerTwo))
+    val field3 = field2.update(Move(Cell(1, 1), playerOne))
+    val field4 = field3.update(Move(Cell(0, 1), playerTwo))
+    val field5 = field4.update(Move(Cell(2, 0), playerOne))
 
     val gameOverXWon = context._2.move(field5)
 
@@ -212,15 +213,15 @@ class GameControllerTest {
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
     val field = Field()
-    val field1 = field.update(Move(0, 0, playerOne))
-    val field2 = field1.update(Move(0, 2, playerTwo))
-    val field3 = field2.update(Move(0, 1, playerOne))
-    val field4 = field3.update(Move(1, 0, playerTwo))
-    val field5 = field4.update(Move(1, 2, playerOne))
-    val field6 = field5.update(Move(1, 1, playerTwo))
-    val field7 = field6.update(Move(2, 0, playerOne))
-    val field8 = field7.update(Move(2, 2, playerTwo))
-    val field9 = field8.update(Move(2, 1, playerOne))
+    val field1 = field.update(Move(Cell(0, 0), playerOne))
+    val field2 = field1.update(Move(Cell(0, 2), playerTwo))
+    val field3 = field2.update(Move(Cell(0, 1), playerOne))
+    val field4 = field3.update(Move(Cell(1, 0), playerTwo))
+    val field5 = field4.update(Move(Cell(1, 2), playerOne))
+    val field6 = field5.update(Move(Cell(1, 1), playerTwo))
+    val field7 = field6.update(Move(Cell(2, 0), playerOne))
+    val field8 = field7.update(Move(Cell(2, 2), playerTwo))
+    val field9 = field8.update(Move(Cell(2, 1), playerOne))
 
     val tie = context._2.move(field9)
 

@@ -11,7 +11,8 @@ trait PlayStrategy {
 
 class RandomMoveStrategy extends PlayStrategy {
   private val rand = new Random()
-  def makeMove(field: Field, player: Player): Move = Move(this.rand.nextInt(FieldSize), this.rand.nextInt(FieldSize), player)
+  def makeMove(field: Field, player: Player) = 
+    Move(Cell(this.rand.nextInt(FieldSize), this.rand.nextInt(FieldSize)), player)
 }
 
 class ReadConsoleStrategy extends PlayStrategy {
@@ -28,7 +29,7 @@ class ReadConsoleStrategy extends PlayStrategy {
       doMove(field, player)
     } else {
       val coordinates = parseCoordinates(input)
-      Move(coordinates._1, coordinates._2, player)
+      Move(Cell(coordinates._1, coordinates._2), player)
     }
   }
 
@@ -69,7 +70,5 @@ class GodStrategy extends PlayStrategy {
     Leaf(Field(), Playing, Root, 0)
   }
 
-  def makeMove(field: Field, player: Player): Move = {
-    Move(0, 0, player)
-  }
+  def makeMove(field: Field, player: Player) = Move(Cell(0, 0), player)
 }

@@ -1,6 +1,6 @@
 package net.codejitsu.tictactoe
 
-case class Move(val row: Int, val col: Int, val player: Player) {
-	require(row >= 0 && row < FieldSize)
-	require(col >= 0 && row < FieldSize)
+case class Move(val cell: Cell, val player: Player) {
+	require(cell.row >= 0 && cell.row < FieldSize)
+	require(cell.col >= 0 && cell.row < FieldSize)
 }

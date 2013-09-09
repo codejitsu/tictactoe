@@ -212,7 +212,7 @@ object GameTree {
     case Nil => acc
     case x :: tail => {
       val (row, col) = x
-      val move = Move(row, col, player)
+      val move = Move(Cell(row, col), player)
 
       if (parentField.silentVerify(move)) {
         collectFields(parentField, player, parentField.update(move) :: acc, tail)
