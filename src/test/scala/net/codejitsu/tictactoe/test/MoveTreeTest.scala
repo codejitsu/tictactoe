@@ -13,6 +13,7 @@ import net.codejitsu.tictactoe.tree.MoveTree.Step
 import net.codejitsu.tictactoe.tree.Tree
 import net.codejitsu.tictactoe.PlayerType
 import net.codejitsu.tictactoe.tree.MoveTree._
+import net.codejitsu.tictactoe.GameStatus
 
 class MoveTreeTest {
   @Test def testMoveTree() {
@@ -51,6 +52,9 @@ class MoveTreeTest {
     val paths = MoveTree.collectPaths(tree, EmptyPath, Nil)
 
     println("Total paths:" + paths.size)
+    println("X won: " + paths.filter(p => p.steps.last.status == GameStatus.XWon).size)
+    println("O won: " + paths.filter(p => p.steps.last.status == GameStatus.OWon).size)
+    println("Tie won: " + paths.filter(p => p.steps.last.status == GameStatus.Tie).size)
   }  
   
   def print(tree: Tree[Step], level: Int): Unit = tree match {

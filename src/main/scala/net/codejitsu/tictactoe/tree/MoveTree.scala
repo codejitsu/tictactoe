@@ -7,6 +7,7 @@ import net.codejitsu.tictactoe.Move
 import net.codejitsu.tictactoe.RandomMoveStrategy
 import net.codejitsu.tictactoe.PlayerType
 import net.codejitsu.tictactoe.Game
+import net.codejitsu.tictactoe.GameStatus
 import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.Cell
 
@@ -16,7 +17,7 @@ object MoveTree {
   case class Path(steps: List[Step])
   object EmptyPath extends Path(Nil)
   
-  case class Step(field: Field, player: PlayerType)
+  case class Step(field: Field, player: PlayerType, status: GameStatus = GameStatus.Playing)
  
   private val cells =  List(
       Cell(0, 0), Cell(0, 1), Cell(0, 2), 
@@ -44,9 +45,12 @@ object MoveTree {
     else PlayerType.X
   }  
   
-  private def isGameOver(field: Field) = {
+  private def isGameOver(field: Field): (GameStatus, Boolean) = {
     val status = game.calculateStatus(field)
-    status == OWon || status == XWon || status == Tie  
+    val gameOver = status == OWon || status == XWon || status == Tie
+    
+    if (gameOver) (status, true)
+    else (GameStatus.Playing, false)
   }
   
   @tailrec
@@ -58,7 +62,7 @@ object MoveTree {
       
       lazy val isOver = isGameOver(n)
 
-      if (!isOver) {
+      if (!isOver._2) {
         lazy val nextLevel = Fork(Step(n, nextPl))
 
         lazy val nextFields = fields.get(n).get
@@ -72,7 +76,7 @@ object MoveTree {
         
         make(possibleMoves, step, xn, fields)
       } else {
-        lazy val nextLevel = Leaf(Step(n, nextPl))
+        lazy val nextLevel = Leaf(Step(n, nextPl, isOver._1))
         
         make(possibleMoves, nextLevel, xn, fields)
       }
@@ -88,7 +92,7 @@ object MoveTree {
       
       lazy val isOver = isGameOver(n)
 
-      if (!isOver) {
+      if (!isOver._2) {
         lazy val nextLevel = Fork(Step(n, nextPl))
 
         lazy val nextFields = fields.get(n).get
@@ -102,7 +106,7 @@ object MoveTree {
         
         make2(possibleMoves, step, xn, fields)
       } else {
-        lazy val nextLevel = Leaf(Step(n, nextPl))
+        lazy val nextLevel = Leaf(Step(n, nextPl, isOver._1))
         
         make2(possibleMoves, nextLevel, xn, fields)
       }
