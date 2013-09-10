@@ -1,21 +1,18 @@
 package net.codejitsu.tictactoe.test
 
-import org.junit.Assert.assertNotNull
-import org.junit.Test
-import org.junit.Assert._
-import net.codejitsu.tictactoe.tree.Tree
-import net.codejitsu.tictactoe.tree.Step
-import net.codejitsu.tictactoe.tree.MoveTree
-import net.codejitsu.tictactoe.tree.Step
-import net.codejitsu.tictactoe.tree.Fork
-import net.codejitsu.tictactoe.Field
-import net.codejitsu.tictactoe.PlayerType
-import net.codejitsu.tictactoe.tree.Leaf
-import net.codejitsu.tictactoe.Player
-import net.codejitsu.tictactoe.RandomMoveStrategy
 import scala.annotation.tailrec
 import scala.collection.immutable.HashSet
+import org.junit.Assert.assertEquals
+import org.junit.Test
 import net.codejitsu.tictactoe.Cell
+import net.codejitsu.tictactoe.Field
+import net.codejitsu.tictactoe.tree.Fork
+import net.codejitsu.tictactoe.tree.Leaf
+import net.codejitsu.tictactoe.tree.MoveTree
+import net.codejitsu.tictactoe.tree.MoveTree.Step
+import net.codejitsu.tictactoe.tree.Tree
+import net.codejitsu.tictactoe.PlayerType
+import net.codejitsu.tictactoe.tree.MoveTree._
 
 class MoveTreeTest {
   @Test def testMoveTree() {
@@ -24,6 +21,16 @@ class MoveTreeTest {
     val tree: Tree[Step] = MoveTree.build(cells = cells)
     
     assertEquals(16, size(List(tree)))
+  }
+  
+  @Test def testCollectPaths() {
+    val cells =  List(Cell(0, 0), Cell(0, 1), Cell(0, 2))
+    
+    val tree: Tree[Step] = MoveTree.build(cells = cells)
+    
+    val paths = MoveTree.collectPaths(tree, EmptyPath, Nil)
+
+    assertEquals(6, paths.size)
   }
   
   @Test def testFullMoveTree() {
@@ -36,6 +43,14 @@ class MoveTreeTest {
     val leafs = allLeafs(List(tree), 0, HashSet.empty)
     
     println("Total # leafs: " + leafs._1 + " unique: " + leafs._2.size)
+  }  
+  
+  @Test def testCollectPathsFullTree() {
+    val tree: Tree[Step] = MoveTree.build()
+    
+    val paths = MoveTree.collectPaths(tree, EmptyPath, Nil)
+
+    println("Total paths:" + paths.size)
   }  
   
   def print(tree: Tree[Step], level: Int): Unit = tree match {

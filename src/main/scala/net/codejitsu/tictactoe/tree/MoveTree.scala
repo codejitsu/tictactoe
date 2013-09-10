@@ -10,10 +10,13 @@ import net.codejitsu.tictactoe.Game
 import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.Cell
 
-case class Step(field: Field, player: PlayerType)
-
 object MoveTree {
   import scala.annotation.tailrec
+  
+  case class Path(steps: List[Step])
+  object EmptyPath extends Path(Nil)
+  
+  case class Step(field: Field, player: PlayerType)
  
   private val cells =  List(
       Cell(0, 0), Cell(0, 1), Cell(0, 2), 
@@ -135,5 +138,19 @@ object MoveTree {
 	val allLevels = MoveTree.collectAll(List((Field(), player)), cells, Map.empty)
     
 	make(cells, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)    
+  }
+
+  def collectPaths(tree: Tree[Step],
+    current: Path, acc: List[Path]): List[Path] = tree match {
+    case leaf: Leaf[Step] => {
+      current.copy(steps = current.steps :+ leaf.value.get) :: acc
+    }
+    case fork: Fork[Step] if !fork.children.get.isEmpty => {
+      fork.children.get.flatMap(ch => collectPaths(ch, 
+          current.copy(steps = current.steps :+ fork.value.get), acc))
+    }
+    case fork: Fork[Step] if fork.children.get.isEmpty => {
+      current.copy(steps = current.steps :+ fork.value.get) :: acc
+    }    
   }
 }
