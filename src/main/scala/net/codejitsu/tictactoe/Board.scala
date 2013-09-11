@@ -16,14 +16,14 @@ case class Cell(row: Int, col: Int, status: CellStatus = Free)
 /**
  * Board to play TicTacToe.
  */
-case class Board(val cells: List[Cell]) {
+case class Board(val cells: List[Cell] = List[Cell]()) {
   def isEmpty = cells.isEmpty
 
   def isFull = cells.size == FieldSize * FieldSize
 
-  def update(move: Move): Board = move.player.playerType match {
-    case X if verify(move) => Board.this.copy(cells = move.cell.copy(status = OccupiedByX) :: cells)
-    case O if verify(move) => Board.this.copy(cells = move.cell.copy(status = OccupiedByO) :: cells)
+  def update(move: Move): Board = move.player match {
+    case X if verify(move) => copy(cells = move.cell.copy(status = OccupiedByX) :: cells)
+    case O if verify(move) => copy(cells = move.cell.copy(status = OccupiedByO) :: cells)
   }
 
   def verify(move: Move): Boolean = {
@@ -86,16 +86,12 @@ case class Board(val cells: List[Cell]) {
     }
   }
 
-  override def hashCode = 41 + Board.this.toString.hashCode
+  override def hashCode = 41 + this.toString.hashCode
   override def equals(other: Any): Boolean = other match {
     case that: Board => (
-      that.canEqual(Board.this)
+      that.canEqual(this)
       && Board.this.toString == that.toString)
     case _ => false
   }
   def canEqual(other: Any): Boolean = other.isInstanceOf[Board]  
-}
-
-object Board {
-  def apply() = new Board(List())
 }

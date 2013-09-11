@@ -37,7 +37,7 @@ object MoveTree {
     case Nil => acc
     case x :: tail => {
       if (field.silentVerify(x.row, x.col)) {
-        collect(field, player, field.update(Move(x, player)) :: acc, tail)
+        collect(field, player, field.update(Move(x, player.playerType)) :: acc, tail)
       } else {
         collect(field, player, acc, tail)
       }

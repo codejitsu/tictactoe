@@ -15,7 +15,7 @@ trait PlayStrategy {
 class RandomMoveStrategy extends PlayStrategy {
   private val rand = new Random()
   def makeMove(field: Board, player: Player) = 
-    Move(Cell(this.rand.nextInt(FieldSize), this.rand.nextInt(FieldSize)), player)
+    Move(Cell(this.rand.nextInt(FieldSize), this.rand.nextInt(FieldSize)), player.playerType)
 }
 
 class ReadConsoleStrategy extends PlayStrategy {
@@ -32,7 +32,7 @@ class ReadConsoleStrategy extends PlayStrategy {
       doMove(field, player)
     } else {
       val coordinates = parseCoordinates(input)
-      Move(Cell(coordinates._1, coordinates._2), player)
+      Move(Cell(coordinates._1, coordinates._2), player.playerType)
     }
   }
 
@@ -58,5 +58,5 @@ class ReadConsoleStrategy extends PlayStrategy {
 class GodStrategy extends PlayStrategy {
   private lazy val gameTree: Tree[Step] = MoveTree.build(X)
 
-  def makeMove(field: Board, player: Player) = Move(Cell(0, 0), player)
+  def makeMove(field: Board, player: Player) = Move(Cell(0, 0), player.playerType)
 }
