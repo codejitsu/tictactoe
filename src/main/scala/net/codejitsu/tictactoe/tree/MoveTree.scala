@@ -1,6 +1,6 @@
 package net.codejitsu.tictactoe.tree
 
-import net.codejitsu.tictactoe.Field
+import net.codejitsu.tictactoe.Board
 import net.codejitsu.tictactoe.PlayerType._
 import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.Move
@@ -17,7 +17,7 @@ object MoveTree {
   case class Path(steps: List[Step])
   object EmptyPath extends Path(Nil)
   
-  case class Step(field: Field, player: PlayerType, status: GameStatus = GameStatus.Playing)
+  case class Step(field: Board, player: PlayerType, status: GameStatus = GameStatus.Playing)
  
   private val cells =  List(
       Cell(0, 0), Cell(0, 1), Cell(0, 2), 
@@ -32,8 +32,8 @@ object MoveTree {
   private lazy val allPaths = collectPaths(tree, EmptyPath, Nil)
   
   @tailrec
-  private def collect(field: Field, player: Player, 
-      acc: List[Field], moves: List[Cell]): List[Field] = moves match {
+  private def collect(field: Board, player: Player, 
+      acc: List[Board], moves: List[Cell]): List[Board] = moves match {
     case Nil => acc
     case x :: tail => {
       if (field.silentVerify(x.row, x.col)) {
@@ -49,7 +49,7 @@ object MoveTree {
     else PlayerType.X
   }  
   
-  private def isGameOver(field: Field): (GameStatus, Boolean) = {
+  private def isGameOver(field: Board): (GameStatus, Boolean) = {
     val status = game.calculateStatus(field)
     val gameOver = status == OWon || status == XWon || status == Tie
     
@@ -59,7 +59,7 @@ object MoveTree {
   
   @tailrec
   private def make(possibleMoves: List[Cell], 
-      node: Tree[Step], next: List[Field], fields: Map[Field, List[Field]]): Tree[Step] = next match {
+      node: Tree[Step], next: List[Board], fields: Map[Board, List[Board]]): Tree[Step] = next match {
     case Nil => node
     case n :: xn => {
       lazy val nextPl = nextPlayer(node.value.get.player)
@@ -89,7 +89,7 @@ object MoveTree {
   
   @tailrec
   private def make2(possibleMoves: List[Cell], 
-      node: Tree[Step], next: List[Field], fields: Map[Field, List[Field]]): Tree[Step] = next match {
+      node: Tree[Step], next: List[Board], fields: Map[Board, List[Board]]): Tree[Step] = next match {
     case Nil => node
     case n :: xn => {
      lazy val nextPl = nextPlayer(node.value.get.player)
@@ -118,8 +118,8 @@ object MoveTree {
   }
   
   @tailrec
-  private def collectAll(fields: List[(Field, PlayerType)], 
-      possibleMoves: List[Cell], all: Map[Field, List[Field]]): Map[Field, List[Field]] = fields match {
+  private def collectAll(fields: List[(Board, PlayerType)], 
+      possibleMoves: List[Cell], all: Map[Board, List[Board]]): Map[Board, List[Board]] = fields match {
     case Nil => all
     case x :: xn => {
       if (!all.contains(x._1)) {
@@ -142,10 +142,10 @@ object MoveTree {
   
   def build(player: PlayerType = PlayerType.X, cells: List[Cell] = this.cells) = {
     val p = Player("Player", player, new RandomMoveStrategy())
-    val firstLevel = MoveTree.collect(Field(), p, Nil, cells)    
-	val allLevels = MoveTree.collectAll(List((Field(), player)), cells, Map.empty)
+    val firstLevel = MoveTree.collect(Board(), p, Nil, cells)    
+	val allLevels = MoveTree.collectAll(List((Board(), player)), cells, Map.empty)
     
-	make(cells, Fork(Step(Field(), PlayerType.X)), firstLevel, allLevels)    
+	make(cells, Fork(Step(Board(), PlayerType.X)), firstLevel, allLevels)    
   }
 
   def collectPaths(tree: Tree[Step],

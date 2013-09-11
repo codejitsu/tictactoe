@@ -9,18 +9,18 @@ import net.codejitsu.tictactoe.tree.MoveTree.Step
 import net.codejitsu.tictactoe.tree.MoveTree
 
 trait PlayStrategy {
-  def makeMove(field: Field, player: Player): Move
+  def makeMove(field: Board, player: Player): Move
 }
 
 class RandomMoveStrategy extends PlayStrategy {
   private val rand = new Random()
-  def makeMove(field: Field, player: Player) = 
+  def makeMove(field: Board, player: Player) = 
     Move(Cell(this.rand.nextInt(FieldSize), this.rand.nextInt(FieldSize)), player)
 }
 
 class ReadConsoleStrategy extends PlayStrategy {
   @tailrec
-  private def doMove(field: Field, player: Player): Move = {
+  private def doMove(field: Board, player: Player): Move = {
     print(player.playerType + ": ")
 
     val input = readLine()
@@ -36,7 +36,7 @@ class ReadConsoleStrategy extends PlayStrategy {
     }
   }
 
-  def makeMove(field: Field, player: Player): Move = {
+  def makeMove(field: Board, player: Player): Move = {
     doMove(field, player)
   }
 
@@ -58,5 +58,5 @@ class ReadConsoleStrategy extends PlayStrategy {
 class GodStrategy extends PlayStrategy {
   private lazy val gameTree: Tree[Step] = MoveTree.build(X)
 
-  def makeMove(field: Field, player: Player) = Move(Cell(0, 0), player)
+  def makeMove(field: Board, player: Player) = Move(Cell(0, 0), player)
 }

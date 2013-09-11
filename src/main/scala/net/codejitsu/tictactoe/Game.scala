@@ -19,7 +19,7 @@ case class Game(val playerX: Player, val playerO: Player) {
 
   def getPlayer(ptype: PlayerType): Player = if (ptype == PlayerType.X) this.playerX else playerO
 
-  def makeMove(player: PlayerType, field: Field): (Field, Boolean) = {
+  def makeMove(player: PlayerType, field: Board): (Board, Boolean) = {
     try {
       (field.update(getPlayer(player).makeMove(field)), true)
     } catch {
@@ -29,7 +29,7 @@ case class Game(val playerX: Player, val playerO: Player) {
     }
   }
 
-  def checkFieldSpace(field: Field, f: Int => Set[(CellStatus, Cell)]): GameStatus = {
+  def checkFieldSpace(field: Board, f: Int => Set[Cell]): GameStatus = {
     val space = List(0, 1, 2).map(f(_))
 
     val checkedSpace = space.map(allCellsOccupiedBySamePlayer _)
@@ -53,7 +53,7 @@ case class Game(val playerX: Player, val playerO: Player) {
     }    
   }
 
-  def calculateStatus(field: Field): GameStatus = {
+  def calculateStatus(field: Board): GameStatus = {
     val horizontalStatus = checkFieldSpace(field, field.getRow)
     val verticalStatus = checkFieldSpace(field, field.getColumn)
     
@@ -86,11 +86,11 @@ case class Game(val playerX: Player, val playerO: Player) {
     }
   }
 
-  def allCellsOccupiedBySamePlayer(cells: Set[(CellStatus, Cell)]): (Boolean, Option[CellStatus]) = {
+  def allCellsOccupiedBySamePlayer(cells: Set[Cell]): (Boolean, Option[CellStatus]) = {
     if (cells.size != FieldSize) {
       (false, None)
     } else {
-      val allPlayers = cells.map(c => c._1)
+      val allPlayers = cells.map(c => c.status)
       (allPlayers.size == 1, Option(allPlayers.toList.head))
     }
   }

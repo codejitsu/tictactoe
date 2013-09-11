@@ -4,7 +4,7 @@ import net.codejitsu.tictactoe.RandomMoveStrategy
 import net.codejitsu.tictactoe.GameContext
 import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.ReadConsoleStrategy
-import net.codejitsu.tictactoe.Field
+import net.codejitsu.tictactoe.Board
 
 object TicTacToeConsole extends App {
   val playerOne = Player("Player 1", X, new ReadConsoleStrategy())
@@ -13,7 +13,7 @@ object TicTacToeConsole extends App {
   val initContext = GameContext(playerOne, playerTwo, X, NotStarted, 
       _ => println("Error: Illegal move!\n")).start()
 
-  def contexts(field: Field, context: GameContext): Unit = {
+  def contexts(field: Board, context: GameContext): Unit = {
     if (context.currentPlayer == playerOne.playerType) println(field.toString)
 
     if (context.status == Playing) {

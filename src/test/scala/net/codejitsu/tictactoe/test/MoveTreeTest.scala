@@ -5,7 +5,7 @@ import scala.collection.immutable.HashSet
 import org.junit.Assert._
 import org.junit.Test
 import net.codejitsu.tictactoe.Cell
-import net.codejitsu.tictactoe.Field
+import net.codejitsu.tictactoe.Board
 import net.codejitsu.tictactoe.tree.Fork
 import net.codejitsu.tictactoe.tree.Leaf
 import net.codejitsu.tictactoe.tree.MoveTree
@@ -74,7 +74,7 @@ class MoveTreeTest {
   }
 
   @tailrec
-  private def allLeafs(tree: List[Tree[Step]], acc: Int, all: HashSet[Field]): (Int, HashSet[Field]) = tree match {
+  private def allLeafs(tree: List[Tree[Step]], acc: Int, all: HashSet[Board]): (Int, HashSet[Board]) = tree match {
     case Nil => (acc, all)
     case x :: xn => x match {
       case n: Fork[Step] => {

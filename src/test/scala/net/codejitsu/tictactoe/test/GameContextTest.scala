@@ -1,17 +1,24 @@
 package net.codejitsu.tictactoe.test
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.Assert._
-import net.codejitsu.tictactoe.Player
-import net.codejitsu.tictactoe.PlayerType._
-import net.codejitsu.tictactoe.RandomMoveStrategy
-import net.codejitsu.tictactoe.GameContext
-import net.codejitsu.tictactoe.GameStatus._
-import net.codejitsu.tictactoe.Field
-import net.codejitsu.tictactoe.Move
-import net.codejitsu.tictactoe.GameContext
-import net.codejitsu.tictactoe.PlayStrategy
+
+import net.codejitsu.tictactoe.Board
 import net.codejitsu.tictactoe.Cell
+import net.codejitsu.tictactoe.GameContext
+import net.codejitsu.tictactoe.GameStatus.NotStarted
+import net.codejitsu.tictactoe.GameStatus.Playing
+import net.codejitsu.tictactoe.GameStatus.Tie
+import net.codejitsu.tictactoe.GameStatus.XWon
+import net.codejitsu.tictactoe.Move
+import net.codejitsu.tictactoe.PlayStrategy
+import net.codejitsu.tictactoe.Player
+import net.codejitsu.tictactoe.PlayerType.O
+import net.codejitsu.tictactoe.PlayerType.PlayerType
+import net.codejitsu.tictactoe.PlayerType.X
+import net.codejitsu.tictactoe.RandomMoveStrategy
 
 class GameControllerTest {
   @Test def initGameController() {
@@ -49,18 +56,18 @@ class GameControllerTest {
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
-    val field = Field()
-    val field1 = field.update(Move(Cell(0, 0), playerOne))
-    val field2 = field1.update(Move(Cell(0, 2), playerTwo))
-    val field3 = field2.update(Move(Cell(0, 1), playerOne))
-    val field4 = field3.update(Move(Cell(1, 0), playerTwo))
-    val field5 = field4.update(Move(Cell(1, 2), playerOne))
-    val field6 = field5.update(Move(Cell(1, 1), playerTwo))
-    val field7 = field6.update(Move(Cell(2, 0), playerOne))
-    val field8 = field7.update(Move(Cell(2, 2), playerTwo))
-    val field9 = field8.update(Move(Cell(2, 1), playerOne))
+    val board = Board()
+    val board1 = board.update(Move(Cell(0, 0), playerOne))
+    val board2 = board1.update(Move(Cell(0, 2), playerTwo))
+    val board3 = board2.update(Move(Cell(0, 1), playerOne))
+    val board4 = board3.update(Move(Cell(1, 0), playerTwo))
+    val board5 = board4.update(Move(Cell(1, 2), playerOne))
+    val board6 = board5.update(Move(Cell(1, 1), playerTwo))
+    val board7 = board6.update(Move(Cell(2, 0), playerOne))
+    val board8 = board7.update(Move(Cell(2, 2), playerTwo))
+    val board9 = board8.update(Move(Cell(2, 1), playerOne))
 
-    val tie = context._2.move(field9)
+    val tie = context._2.move(board9)
 
     assertTrue(tie._1.isFull)
     assertTrue(tie._2.status == Tie)
@@ -69,11 +76,11 @@ class GameControllerTest {
   @Test(expected = classOf[ArithmeticException])
   def onErrorCalled() {
     val playerOne = Player("Player 1", X, new PlayStrategy {
-      def makeMove(field: Field, player: Player): Move = Move(Cell(0, 0), player)
+      def makeMove(field: Board, player: Player): Move = Move(Cell(0, 0), player)
     })
     
     val playerTwo = Player("Player 2", O, new PlayStrategy {
-      def makeMove(field: Field, player: Player): Move = Move(Cell(0, 0), player)
+      def makeMove(field: Board, player: Player): Move = Move(Cell(0, 0), player)
     })
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start()
@@ -131,19 +138,19 @@ class GameControllerTest {
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
-    val field = Field()
+    val board = Board()
 
-    val field1 = field.update(Move(Cell(0, 0), playerOne))
+    val board1 = board.update(Move(Cell(0, 0), playerOne))
 
-    val field2 = field1.update(Move(Cell(1, 1), playerTwo))
+    val board2 = board1.update(Move(Cell(1, 1), playerTwo))
 
-    val field3 = field2.update(Move(Cell(0, 1), playerOne))
+    val board3 = board2.update(Move(Cell(0, 1), playerOne))
 
-    val field4 = field3.update(Move(Cell(2, 2), playerTwo))
+    val board4 = board3.update(Move(Cell(2, 2), playerTwo))
 
-    val field5 = field4.update(Move(Cell(0, 2), playerOne))
+    val board5 = board4.update(Move(Cell(0, 2), playerOne))
 
-    val gameOverXWon = context._2.move(field5)
+    val gameOverXWon = context._2.move(board5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -155,14 +162,14 @@ class GameControllerTest {
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
-    val field = Field()
-    val field1 = field.update(Move(Cell(0, 0), playerOne))
-    val field2 = field1.update(Move(Cell(1, 1), playerTwo))
-    val field3 = field2.update(Move(Cell(1, 0), playerOne))
-    val field4 = field3.update(Move(Cell(2, 2), playerTwo))
-    val field5 = field4.update(Move(Cell(2, 0), playerOne))
+    val board = Board()
+    val board1 = board.update(Move(Cell(0, 0), playerOne))
+    val board2 = board1.update(Move(Cell(1, 1), playerTwo))
+    val board3 = board2.update(Move(Cell(1, 0), playerOne))
+    val board4 = board3.update(Move(Cell(2, 2), playerTwo))
+    val board5 = board4.update(Move(Cell(2, 0), playerOne))
 
-    val gameOverXWon = context._2.move(field5)
+    val gameOverXWon = context._2.move(board5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -174,14 +181,14 @@ class GameControllerTest {
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
-    val field = Field()
-    val field1 = field.update(Move(Cell(0, 0), playerOne))
-    val field2 = field1.update(Move(Cell(1, 0), playerTwo))
-    val field3 = field2.update(Move(Cell(1, 1), playerOne))
-    val field4 = field3.update(Move(Cell(0, 1), playerTwo))
-    val field5 = field4.update(Move(Cell(2, 2), playerOne))
+    val board = Board()
+    val board1 = board.update(Move(Cell(0, 0), playerOne))
+    val board2 = board1.update(Move(Cell(1, 0), playerTwo))
+    val board3 = board2.update(Move(Cell(1, 1), playerOne))
+    val board4 = board3.update(Move(Cell(0, 1), playerTwo))
+    val board5 = board4.update(Move(Cell(2, 2), playerOne))
 
-    val gameOverXWon = context._2.move(field5)
+    val gameOverXWon = context._2.move(board5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -193,14 +200,14 @@ class GameControllerTest {
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
-    val field = Field()
-    val field1 = field.update(Move(Cell(0, 2), playerOne))
-    val field2 = field1.update(Move(Cell(1, 0), playerTwo))
-    val field3 = field2.update(Move(Cell(1, 1), playerOne))
-    val field4 = field3.update(Move(Cell(0, 1), playerTwo))
-    val field5 = field4.update(Move(Cell(2, 0), playerOne))
+    val board = Board()
+    val board1 = board.update(Move(Cell(0, 2), playerOne))
+    val board2 = board1.update(Move(Cell(1, 0), playerTwo))
+    val board3 = board2.update(Move(Cell(1, 1), playerOne))
+    val board4 = board3.update(Move(Cell(0, 1), playerTwo))
+    val board5 = board4.update(Move(Cell(2, 0), playerOne))
 
-    val gameOverXWon = context._2.move(field5)
+    val gameOverXWon = context._2.move(board5)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -212,18 +219,18 @@ class GameControllerTest {
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
 
-    val field = Field()
-    val field1 = field.update(Move(Cell(0, 0), playerOne))
-    val field2 = field1.update(Move(Cell(0, 2), playerTwo))
-    val field3 = field2.update(Move(Cell(0, 1), playerOne))
-    val field4 = field3.update(Move(Cell(1, 0), playerTwo))
-    val field5 = field4.update(Move(Cell(1, 2), playerOne))
-    val field6 = field5.update(Move(Cell(1, 1), playerTwo))
-    val field7 = field6.update(Move(Cell(2, 0), playerOne))
-    val field8 = field7.update(Move(Cell(2, 2), playerTwo))
-    val field9 = field8.update(Move(Cell(2, 1), playerOne))
+    val board = Board()
+    val board1 = board.update(Move(Cell(0, 0), playerOne))
+    val board2 = board1.update(Move(Cell(0, 2), playerTwo))
+    val board3 = board2.update(Move(Cell(0, 1), playerOne))
+    val board4 = board3.update(Move(Cell(1, 0), playerTwo))
+    val board5 = board4.update(Move(Cell(1, 2), playerOne))
+    val board6 = board5.update(Move(Cell(1, 1), playerTwo))
+    val board7 = board6.update(Move(Cell(2, 0), playerOne))
+    val board8 = board7.update(Move(Cell(2, 2), playerTwo))
+    val board9 = board8.update(Move(Cell(2, 1), playerOne))
 
-    val tie = context._2.move(field9)
+    val tie = context._2.move(board9)
 
     assertEquals(Tie, tie._2.status)
   }

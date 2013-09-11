@@ -15,7 +15,7 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   }
 
   @tailrec
-  private def safeMove(field: Field): Field = {
+  private def safeMove(field: Board): Board = {
     game.makeMove(currentPlayer, field) match {
       case (_, false) => {
         onError()
@@ -25,13 +25,13 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
     }
   }
 
-  def start(): (Field, GameContext) = {
+  def start(): (Board, GameContext) = {
     if (status != NotStarted) throw new IllegalStateException
 
-    this.copy(status = Playing, currentPlayer = currentPlayer).move(Field())
+    this.copy(status = Playing, currentPlayer = currentPlayer).move(Board())
   }
 
-  def move(field: Field): (Field, GameContext) = {
+  def move(field: Board): (Board, GameContext) = {
     if (this.status == GameStatus.OWon || this.status == GameStatus.XWon || this.status == GameStatus.Tie) {
       throw new IllegalStateException
     }
@@ -51,7 +51,7 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
     }
   }
 
-  private def triggerMove(field: Field, context: GameContext): (Field, GameContext) = {
+  private def triggerMove(field: Board, context: GameContext): (Board, GameContext) = {
     if (context.status != Playing) throw new IllegalStateException
     if (field.isFull) throw new GameOverException
 
