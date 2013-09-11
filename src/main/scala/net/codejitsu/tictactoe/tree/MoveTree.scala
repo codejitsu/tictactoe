@@ -27,6 +27,10 @@ object MoveTree {
   private val game = Game(Player("X", X, new RandomMoveStrategy),
     Player("O", O, new RandomMoveStrategy))  
   
+  private lazy val tree = build()  
+    
+  private lazy val allPaths = collectPaths(tree, EmptyPath, Nil)
+  
   @tailrec
   private def collect(field: Field, player: Player, 
       acc: List[Field], moves: List[Cell]): List[Field] = moves match {
@@ -157,4 +161,13 @@ object MoveTree {
       current.copy(steps = current.steps :+ fork.value.get) :: acc
     }    
   }
+  
+  def winPaths(player: PlayerType): List[Path] = {
+    val status = if (player == X) List(XWon, Tie) else List(OWon, Tie)
+    
+    allPaths.filter(p => status.contains(p.steps.last.status))
+  }
+  
+  //TODO best path for given tree
+  //def advice
 }

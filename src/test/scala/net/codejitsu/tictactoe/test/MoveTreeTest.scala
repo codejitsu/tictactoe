@@ -2,7 +2,7 @@ package net.codejitsu.tictactoe.test
 
 import scala.annotation.tailrec
 import scala.collection.immutable.HashSet
-import org.junit.Assert.assertEquals
+import org.junit.Assert._
 import org.junit.Test
 import net.codejitsu.tictactoe.Cell
 import net.codejitsu.tictactoe.Field
@@ -12,8 +12,10 @@ import net.codejitsu.tictactoe.tree.MoveTree
 import net.codejitsu.tictactoe.tree.MoveTree.Step
 import net.codejitsu.tictactoe.tree.Tree
 import net.codejitsu.tictactoe.PlayerType
+import net.codejitsu.tictactoe.PlayerType._
 import net.codejitsu.tictactoe.tree.MoveTree._
 import net.codejitsu.tictactoe.GameStatus
+import net.codejitsu.tictactoe.GameStatus._
 
 class MoveTreeTest {
   @Test def testMoveTree() {
@@ -38,23 +40,25 @@ class MoveTreeTest {
     val start = System.currentTimeMillis
     val tree: Tree[Step] = MoveTree.build()
     
-    println("Total time (ms): " + (System.currentTimeMillis - start))
-    println()
-    
     val leafs = allLeafs(List(tree), 0, HashSet.empty)
     
-    println("Total # leafs: " + leafs._1 + " unique: " + leafs._2.size)
+    assertTrue(leafs._2.size > 0)
   }  
   
-  @Test def testCollectPathsFullTree() {
-    val tree: Tree[Step] = MoveTree.build()
-    
-    val paths = MoveTree.collectPaths(tree, EmptyPath, Nil)
+  @Test def testCollectPathsXFullTree() {
+    val paths = MoveTree.winPaths(X)
 
-    println("Total paths:" + paths.size)
-    println("X won: " + paths.filter(p => p.steps.last.status == GameStatus.XWon).size)
-    println("O won: " + paths.filter(p => p.steps.last.status == GameStatus.OWon).size)
-    println("Tie won: " + paths.filter(p => p.steps.last.status == GameStatus.Tie).size)
+    assertTrue(paths.size > 0)
+    assertTrue(paths.filter(p => p.steps.last.status == XWon).size > 0)
+    assertTrue(paths.filter(p => p.steps.last.status == Tie).size > 0)
+  }  
+
+  @Test def testCollectPathsOFullTree() {
+    val paths = MoveTree.winPaths(O)
+
+    assertTrue(paths.size > 0)
+    assertTrue(paths.filter(p => p.steps.last.status == OWon).size > 0)
+    assertTrue(paths.filter(p => p.steps.last.status == Tie).size > 0)
   }  
   
   def print(tree: Tree[Step], level: Int): Unit = tree match {
