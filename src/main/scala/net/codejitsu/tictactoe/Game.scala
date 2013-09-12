@@ -19,17 +19,15 @@ case class Game(val playerX: Player, val playerO: Player) {
 
   def getPlayer(ptype: PlayerType): Player = if (ptype == PlayerType.X) this.playerX else playerO
 
-  def makeMove(player: PlayerType, field: Board): (Board, Boolean) = {
+  def makeMove(player: PlayerType, board: Board): (Board, Boolean) = {
     try {
-      (field.update(getPlayer(player).makeMove(field)), true)
+      (board.update(getPlayer(player).makeMove(board)), true)
     } catch {
-      case ise: IllegalStateException => {
-        (field, false)
-      }
+      case ise: IllegalStateException => (board, false)
     }
   }
 
-  def checkFieldSpace(field: Board, f: Int => Set[Cell]): GameStatus = {
+  def checkFieldSpace(board: Board, f: Int => Set[Cell]): GameStatus = {
     val space = List(0, 1, 2).map(f(_))
 
     val checkedSpace = space.map(allCellsOccupiedBySamePlayer _)
@@ -44,7 +42,6 @@ case class Game(val playerX: Player, val playerO: Player) {
             case OccupiedByO => OWon
           }
           case None => Playing
-          case _ => Playing
         }
         case None => Playing
       }
@@ -53,15 +50,15 @@ case class Game(val playerX: Player, val playerO: Player) {
     }    
   }
 
-  def calculateStatus(field: Board): GameStatus = {
-    val horizontalStatus = checkFieldSpace(field, field.getRow)
-    val verticalStatus = checkFieldSpace(field, field.getColumn)
+  def calculateStatus(board: Board): GameStatus = {
+    val horizontalStatus = checkFieldSpace(board, board.getRow)
+    val verticalStatus = checkFieldSpace(board, board.getColumn)
     
     if (horizontalStatus != Playing) horizontalStatus
     else if (verticalStatus != Playing) verticalStatus
     else {
-    	val diag1Status = allCellsOccupiedBySamePlayer(field.getFirstDiagonal)
-    	val diag2Status = allCellsOccupiedBySamePlayer(field.getSecondDiagonal)
+    	val diag1Status = allCellsOccupiedBySamePlayer(board.getFirstDiagonal)
+    	val diag2Status = allCellsOccupiedBySamePlayer(board.getSecondDiagonal)
     	
     	if (diag1Status._1 == true) {
 	      diag1Status._2 match {
@@ -80,7 +77,7 @@ case class Game(val playerX: Player, val playerO: Player) {
 	          case None => Playing
 	      } 	  
     	} else {
-    	  if (field.isFull) Tie
+    	  if (board.isFull) Tie
     	  else Playing
     	}
     }
