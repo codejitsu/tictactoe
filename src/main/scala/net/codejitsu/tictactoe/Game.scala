@@ -19,11 +19,12 @@ case class Game(val playerX: Player, val playerO: Player) {
 
   def getPlayer(ptype: PlayerType): Player = if (ptype == PlayerType.X) this.playerX else playerO
 
-  def makeMove(player: PlayerType, board: Board): (Board, Boolean) = {
+  def makeMove(player: PlayerType, board: Board): Option[Board] = {
     try {
-      (board.update(getPlayer(player).makeMove(board)), true)
+      Some(board.update(getPlayer(player).makeMove(board)))
     } catch {
-      case ise: IllegalStateException => (board, false)
+      //TODO remove all exceptions -> monadic | Option
+      case ise: IllegalStateException => None
     }
   }
 

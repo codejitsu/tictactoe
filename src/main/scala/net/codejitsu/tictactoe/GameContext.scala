@@ -15,47 +15,47 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   }
 
   @tailrec
-  private def safeMove(field: Board): Board = {
-    game.makeMove(currentPlayer, field) match {
-      case (_, false) => {
+  private def safeMove(board: Board): Board = {
+    game.makeMove(currentPlayer, board) match {
+      case None => {
         onError()
-        safeMove(field)
+        safeMove(board)
       }
-      case (f, true) => f
+      case Some(f) => f
     }
   }
 
-  def start(): (Board, GameContext) = {
+  def start: (Board, GameContext) = {
     if (status != NotStarted) throw new IllegalStateException
 
     this.copy(status = Playing, currentPlayer = currentPlayer).move(Board())
   }
 
-  def move(field: Board): (Board, GameContext) = {
-    if (this.status == GameStatus.OWon || this.status == GameStatus.XWon || this.status == GameStatus.Tie) {
+  def move(board: Board): (Board, GameContext) = {
+    if (this.status == OWon || this.status == XWon || this.status == Tie) {
       throw new IllegalStateException
     }
 
-    val gameStatus = game.calculateStatus(field)
+    val gameStatus = game.calculateStatus(board)
 
-    if (gameStatus != GameStatus.Playing) {
-      (field, this.copy(status = gameStatus))
+    if (gameStatus != Playing) {
+      (board, this.copy(status = gameStatus))
     } else {
       try {
-        triggerMove(field, this)
+        triggerMove(board, this)
       } catch {
         case goe: GameOverException => {
-          (field, this.copy(status = game.calculateStatus(field)))
+          (board, this.copy(status = game.calculateStatus(board)))
         }
       }
     }
   }
 
-  private def triggerMove(field: Board, context: GameContext): (Board, GameContext) = {
+  private def triggerMove(board: Board, context: GameContext): (Board, GameContext) = {
     if (context.status != Playing) throw new IllegalStateException
-    if (field.isFull) throw new GameOverException
+    if (board.isFull) throw new GameOverException
 
-    (safeMove(field),
+    (safeMove(board),
       context.copy(status = Playing, currentPlayer = context.nextPlayer))
   }
   

@@ -30,7 +30,7 @@ class GameControllerTest {
     assertEquals(NotStarted, context.status)
     assertEquals(O, context.nextPlayer)
 
-    val afterStart = context.start()
+    val afterStart = context.start
 
     assertNotNull(afterStart._2.game)
     assertEquals(Playing, afterStart._2.status)
@@ -45,8 +45,8 @@ class GameControllerTest {
 
     assertEquals(NotStarted, context.status)
 
-    val afterStart = context.start()
-    afterStart._2.start()
+    val afterStart = context.start
+    afterStart._2.start
   }
 
   @Test
@@ -54,7 +54,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), X))
@@ -83,7 +83,7 @@ class GameControllerTest {
       def makeMove(field: Board, player: Player): Move = Move(Cell(0, 0), player.playerType)
     })
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start
     context._2.move(context._1)
   }  
   
@@ -97,7 +97,7 @@ class GameControllerTest {
     assertEquals(X, context.currentPlayer)
 
     try {
-      val step1 = context.start()
+      val step1 = context.start
       checkCurrentPlayer(step1._2, O)
 
       val step2 = step1._2.move(step1._1)
@@ -136,7 +136,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
     val board = Board()
 
@@ -160,7 +160,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
@@ -179,7 +179,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
@@ -198,7 +198,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 2), playerOne.playerType))
@@ -217,7 +217,7 @@ class GameControllerTest {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
-    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start()
+    val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
