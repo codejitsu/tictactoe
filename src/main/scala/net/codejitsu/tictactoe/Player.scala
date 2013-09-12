@@ -12,7 +12,7 @@ case class Player(val name: String, val playerType: PlayerType, val strategy: Pl
 	require(playerType != null)
 	require(strategy != null)
 	
-	def makeMove(field: Board): Move = {
-	  strategy.makeMove(field, this)
+	def makeMove(board: Board): Move = {
+	  strategy.makeMove(board, this)
 	}
 }

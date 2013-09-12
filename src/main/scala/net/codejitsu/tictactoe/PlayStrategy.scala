@@ -9,7 +9,7 @@ import net.codejitsu.tictactoe.tree.MoveTree.Step
 import net.codejitsu.tictactoe.tree.MoveTree
 
 trait PlayStrategy {
-  def makeMove(field: Board, player: Player): Move
+  def makeMove(board: Board, player: Player): Move
 }
 
 class RandomMoveStrategy extends PlayStrategy {
@@ -20,7 +20,7 @@ class RandomMoveStrategy extends PlayStrategy {
 
 class ReadConsoleStrategy extends PlayStrategy {
   @tailrec
-  private def doMove(field: Board, player: Player): Move = {
+  final def makeMove(board: Board, player: Player): Move = {
     print(player.playerType + ": ")
 
     val input = readLine()
@@ -29,18 +29,14 @@ class ReadConsoleStrategy extends PlayStrategy {
 
     if (!verifyInput(input)) {
       println("Invalid input.")
-      doMove(field, player)
+      makeMove(board, player)
     } else {
       val coordinates = parseCoordinates(input)
       Move(Cell(coordinates._1, coordinates._2), player.playerType)
     }
   }
 
-  def makeMove(field: Board, player: Player): Move = {
-    doMove(field, player)
-  }
-
-  def verifyInput(input: String): Boolean = {
+  private def verifyInput(input: String): Boolean = {
     if (input == null) false
     else if (!input.contains(",")) false
     else if (!input.forall(c => c.isDigit || c == ',')) false
@@ -49,7 +45,7 @@ class ReadConsoleStrategy extends PlayStrategy {
     else true
   }
 
-  def parseCoordinates(input: String): (Int, Int) = {
+  private def parseCoordinates(input: String): (Int, Int) = {
     val coords = input.split(",").map(_.toInt)
     (coords(0), coords(1))
   }
