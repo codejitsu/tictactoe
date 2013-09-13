@@ -32,14 +32,14 @@ object MoveTree {
   private lazy val allPaths = collectPaths(tree, EmptyPath, Nil)
   
   @tailrec
-  private def collect(field: Board, player: Player, 
+  private def collect(board: Board, player: Player, 
       acc: List[Board], moves: List[Cell]): List[Board] = moves match {
     case Nil => acc
     case x :: tail => {
-      if (field.silentVerify(x.row, x.col)) {
-        collect(field, player, field.update(Move(x, player.playerType)) :: acc, tail)
+      if (board.verify(Move(x, player.playerType))) {
+        collect(board, player, board.update(Move(x, player.playerType)).get :: acc, tail)
       } else {
-        collect(field, player, acc, tail)
+        collect(board, player, acc, tail)
       }
     }
   }  

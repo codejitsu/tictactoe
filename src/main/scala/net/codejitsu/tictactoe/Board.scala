@@ -21,22 +21,16 @@ case class Board(val cells: List[Cell] = List[Cell]()) {
 
   def isFull = cells.size == FieldSize * FieldSize
 
-  def update(move: Move): Board = move.player match {
-    case X if verify(move) => copy(cells = move.cell.copy(status = OccupiedByX) :: cells)
-    case O if verify(move) => copy(cells = move.cell.copy(status = OccupiedByO) :: cells)
+  def update(move: Move): Option[Board] = move.player match {
+    case X if verify(move) => Some(copy(cells = move.cell.copy(status = OccupiedByX) :: cells))
+    case O if verify(move) => Some(copy(cells = move.cell.copy(status = OccupiedByO) :: cells))
+    case _ => None
   }
 
   def verify(move: Move): Boolean = {
     if (!cells.exists(c => c.row == move.cell.row && c.col == move.cell.col)) true
-    else throw new IllegalStateException()
+    else false
   }
-
-  def silentVerify(move: Move): Boolean = silentVerify(move.cell.row, move.cell.col)
-    
-  def silentVerify(row: Int, col: Int): Boolean = {
-    if (!cells.exists(c => c.row == row && c.col == col)) true
-    else false    
-  }  
   
   def verify(x: Int) = {
     if (x > FieldSize - 1 || x < 0) throw new IllegalArgumentException

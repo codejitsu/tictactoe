@@ -19,14 +19,8 @@ case class Game(val playerX: Player, val playerO: Player) {
 
   def getPlayer(ptype: PlayerType): Player = if (ptype == PlayerType.X) this.playerX else playerO
 
-  def makeMove(player: PlayerType, board: Board): Option[Board] = {
-    try {
-      Some(board.update(getPlayer(player).makeMove(board)))
-    } catch {
-      //TODO remove all exceptions -> monadic | Option
-      case ise: IllegalStateException => None
-    }
-  }
+  def makeMove(player: PlayerType, board: Board): Option[Board] = 
+    board.update(getPlayer(player).makeMove(board))
 
   def checkFieldSpace(board: Board, f: Int => Set[Cell]): GameStatus = {
     val space = List(0, 1, 2).map(f(_))

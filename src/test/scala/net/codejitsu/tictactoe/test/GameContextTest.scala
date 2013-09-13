@@ -58,16 +58,16 @@ class GameControllerTest {
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), X))
-    val board2 = board1.update(Move(Cell(0, 2), O))
-    val board3 = board2.update(Move(Cell(0, 1), X))
-    val board4 = board3.update(Move(Cell(1, 0), O))
-    val board5 = board4.update(Move(Cell(1, 2), X))
-    val board6 = board5.update(Move(Cell(1, 1), O))
-    val board7 = board6.update(Move(Cell(2, 0), X))
-    val board8 = board7.update(Move(Cell(2, 2), O))
-    val board9 = board8.update(Move(Cell(2, 1), X))
+    val board2 = board1.get.update(Move(Cell(0, 2), O))
+    val board3 = board2.get.update(Move(Cell(0, 1), X))
+    val board4 = board3.get.update(Move(Cell(1, 0), O))
+    val board5 = board4.get.update(Move(Cell(1, 2), X))
+    val board6 = board5.get.update(Move(Cell(1, 1), O))
+    val board7 = board6.get.update(Move(Cell(2, 0), X))
+    val board8 = board7.get.update(Move(Cell(2, 2), O))
+    val board9 = board8.get.update(Move(Cell(2, 1), X))
 
-    val tie = context._2.move(board9)
+    val tie = context._2.move(board9.get)
 
     assertTrue(tie._1.isFull)
     assertTrue(tie._2.status == Tie)
@@ -142,15 +142,15 @@ class GameControllerTest {
 
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
 
-    val board2 = board1.update(Move(Cell(1, 1), playerTwo.playerType))
+    val board2 = board1.get.update(Move(Cell(1, 1), playerTwo.playerType))
 
-    val board3 = board2.update(Move(Cell(0, 1), playerOne.playerType))
+    val board3 = board2.get.update(Move(Cell(0, 1), playerOne.playerType))
 
-    val board4 = board3.update(Move(Cell(2, 2), playerTwo.playerType))
+    val board4 = board3.get.update(Move(Cell(2, 2), playerTwo.playerType))
 
-    val board5 = board4.update(Move(Cell(0, 2), playerOne.playerType))
+    val board5 = board4.get.update(Move(Cell(0, 2), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5)
+    val gameOverXWon = context._2.move(board5.get)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -164,12 +164,12 @@ class GameControllerTest {
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
-    val board2 = board1.update(Move(Cell(1, 1), playerTwo.playerType))
-    val board3 = board2.update(Move(Cell(1, 0), playerOne.playerType))
-    val board4 = board3.update(Move(Cell(2, 2), playerTwo.playerType))
-    val board5 = board4.update(Move(Cell(2, 0), playerOne.playerType))
+    val board2 = board1.get.update(Move(Cell(1, 1), playerTwo.playerType))
+    val board3 = board2.get.update(Move(Cell(1, 0), playerOne.playerType))
+    val board4 = board3.get.update(Move(Cell(2, 2), playerTwo.playerType))
+    val board5 = board4.get.update(Move(Cell(2, 0), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5)
+    val gameOverXWon = context._2.move(board5.get)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -183,12 +183,12 @@ class GameControllerTest {
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
-    val board2 = board1.update(Move(Cell(1, 0), playerTwo.playerType))
-    val board3 = board2.update(Move(Cell(1, 1), playerOne.playerType))
-    val board4 = board3.update(Move(Cell(0, 1), playerTwo.playerType))
-    val board5 = board4.update(Move(Cell(2, 2), playerOne.playerType))
+    val board2 = board1.get.update(Move(Cell(1, 0), playerTwo.playerType))
+    val board3 = board2.get.update(Move(Cell(1, 1), playerOne.playerType))
+    val board4 = board3.get.update(Move(Cell(0, 1), playerTwo.playerType))
+    val board5 = board4.get.update(Move(Cell(2, 2), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5)
+    val gameOverXWon = context._2.move(board5.get)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -202,12 +202,12 @@ class GameControllerTest {
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 2), playerOne.playerType))
-    val board2 = board1.update(Move(Cell(1, 0), playerTwo.playerType))
-    val board3 = board2.update(Move(Cell(1, 1), playerOne.playerType))
-    val board4 = board3.update(Move(Cell(0, 1), playerTwo.playerType))
-    val board5 = board4.update(Move(Cell(2, 0), playerOne.playerType))
+    val board2 = board1.get.update(Move(Cell(1, 0), playerTwo.playerType))
+    val board3 = board2.get.update(Move(Cell(1, 1), playerOne.playerType))
+    val board4 = board3.get.update(Move(Cell(0, 1), playerTwo.playerType))
+    val board5 = board4.get.update(Move(Cell(2, 0), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5)
+    val gameOverXWon = context._2.move(board5.get)
 
     assertEquals(XWon, gameOverXWon._2.status)
   }
@@ -221,16 +221,16 @@ class GameControllerTest {
 
     val board = Board()
     val board1 = board.update(Move(Cell(0, 0), playerOne.playerType))
-    val board2 = board1.update(Move(Cell(0, 2), playerTwo.playerType))
-    val board3 = board2.update(Move(Cell(0, 1), playerOne.playerType))
-    val board4 = board3.update(Move(Cell(1, 0), playerTwo.playerType))
-    val board5 = board4.update(Move(Cell(1, 2), playerOne.playerType))
-    val board6 = board5.update(Move(Cell(1, 1), playerTwo.playerType))
-    val board7 = board6.update(Move(Cell(2, 0), playerOne.playerType))
-    val board8 = board7.update(Move(Cell(2, 2), playerTwo.playerType))
-    val board9 = board8.update(Move(Cell(2, 1), playerOne.playerType))
+    val board2 = board1.get.update(Move(Cell(0, 2), playerTwo.playerType))
+    val board3 = board2.get.update(Move(Cell(0, 1), playerOne.playerType))
+    val board4 = board3.get.update(Move(Cell(1, 0), playerTwo.playerType))
+    val board5 = board4.get.update(Move(Cell(1, 2), playerOne.playerType))
+    val board6 = board5.get.update(Move(Cell(1, 1), playerTwo.playerType))
+    val board7 = board6.get.update(Move(Cell(2, 0), playerOne.playerType))
+    val board8 = board7.get.update(Move(Cell(2, 2), playerTwo.playerType))
+    val board9 = board8.get.update(Move(Cell(2, 1), playerOne.playerType))
 
-    val tie = context._2.move(board9)
+    val tie = context._2.move(board9.get)
 
     assertEquals(Tie, tie._2.status)
   }
