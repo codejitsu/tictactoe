@@ -5,6 +5,8 @@ import net.codejitsu.tictactoe.GameContext
 import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.ReadConsoleStrategy
 import net.codejitsu.tictactoe.Board
+import scala.util.Failure
+import scala.util.Success
 
 object TicTacToeConsole extends App {
   val playerOne = Player("Player 1", X, new ReadConsoleStrategy())
@@ -18,12 +20,18 @@ object TicTacToeConsole extends App {
 
     if (context.status == Playing) {
       val step = context.move(board)
-      play(step._1, step._2)
+      step match {
+        case Success(c) => play(c._1, c._2)
+        case Failure(_) => println("Error!")
+      }
     } else {
       println(board.toString)
       println("Game over: " + context.statusString)
     }
   }
 
-  play(initContext._1, initContext._2)
+  initContext match {
+    case Failure(_) => println("Game initialization error.")
+    case Success(c) => play(c._1, c._2)
+  }
 }

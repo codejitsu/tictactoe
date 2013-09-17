@@ -1,10 +1,7 @@
 package net.codejitsu.tictactoe.test
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.{assertEquals, assertNotNull, assertTrue, fail}
 import org.junit.Test
-
 import net.codejitsu.tictactoe.Board
 import net.codejitsu.tictactoe.Cell
 import net.codejitsu.tictactoe.GameContext
@@ -19,6 +16,9 @@ import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
 import net.codejitsu.tictactoe.RandomMoveStrategy
+import scala.util.Success
+import scala.util.Failure
+import scala.util.Failure
 
 class GameControllerTest {
   @Test def initGameController() {
@@ -32,11 +32,17 @@ class GameControllerTest {
 
     val afterStart = context.start
 
-    assertNotNull(afterStart._2.game)
-    assertEquals(Playing, afterStart._2.status)
+    afterStart match {
+      case Success(c) => {
+        assertNotNull(c._2.game)
+        assertEquals(Playing, c._2.status)
+      }
+      
+      case _ => fail()
+    }
   }
 
-  @Test(expected = classOf[IllegalStateException])
+  @Test
   def startCalledTwiceResultsInExceptions() {
     val playerOne = Player("Player 1", X, new RandomMoveStrategy())
     val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
@@ -46,7 +52,13 @@ class GameControllerTest {
     assertEquals(NotStarted, context.status)
 
     val afterStart = context.start
-    afterStart._2.start
+    
+    val c = afterStart.flatMap(f => f._2.start)
+    
+    c match {
+      case Success(_) => fail()
+      case Failure(_) => 
+    }
   }
 
   @Test
@@ -67,10 +79,19 @@ class GameControllerTest {
     val board8 = board7.get.update(Move(Cell(2, 2), O))
     val board9 = board8.get.update(Move(Cell(2, 1), X))
 
-    val tie = context._2.move(board9.get)
-
-    assertTrue(tie._1.isFull)
-    assertTrue(tie._2.status == Tie)
+    context match {
+      case Failure(_) => fail()
+      case Success(c) => {
+        val tie = c._2.move(board9.get)
+        tie match {
+          case Success(t) => {
+            assertTrue(t._1.isFull)
+            assertTrue(t._2.status == Tie)
+          }
+          case _ => fail()
+        }
+      }
+    }
   }
 
   @Test(expected = classOf[ArithmeticException])
@@ -84,7 +105,11 @@ class GameControllerTest {
     })
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start
-    context._2.move(context._1)
+    
+    context match {
+      case Failure(_) => fail()
+      case Success(c) => c._2.move(c._1)
+    }
   }  
   
   @Test
@@ -98,31 +123,67 @@ class GameControllerTest {
 
     try {
       val step1 = context.start
-      checkCurrentPlayer(step1._2, O)
+      
+      step1 match {
+        case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(_) => fail()
+      }
+      
+      val step2 = step1.flatMap(f => f._2.move(f._1))
 
-      val step2 = step1._2.move(step1._1)
-      checkCurrentPlayer(step2._2, X)
+      step2 match {
+        case Success(c) => checkCurrentPlayer(c._2, X)
+        case Failure(_) => fail()
+      }
+      
+      val step3 = step2.flatMap(f => f._2.move(f._1))
+      
+      step3 match {
+        case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(_) => fail()
+      }      
+      
+      val step4 = step3.flatMap(f => f._2.move(f._1))
+      
+      step4 match {
+        case Success(c) => checkCurrentPlayer(c._2, X)
+        case Failure(_) => fail()
+      }    
 
-      val step3 = step2._2.move(step2._1)
-      checkCurrentPlayer(step3._2, O)
+      val step5 = step4.flatMap(f => f._2.move(f._1))
+      
+      step5 match {
+        case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(_) => fail()
+      }
 
-      val step4 = step3._2.move(step3._1)
-      checkCurrentPlayer(step4._2, X)
+      val step6 = step5.flatMap(f => f._2.move(f._1))
+      
+      step6 match {
+        case Success(c) => checkCurrentPlayer(c._2, X)
+        case Failure(_) => fail()
+      }
 
-      val step5 = step4._2.move(step4._1)
-      checkCurrentPlayer(step5._2, O)
+      val step7 = step6.flatMap(f => f._2.move(f._1))
+      
+      step7 match {
+        case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(_) => fail()
+      }
 
-      val step6 = step5._2.move(step5._1)
-      checkCurrentPlayer(step6._2, X)
+      val step8 = step7.flatMap(f => f._2.move(f._1))
+      
+      step8 match {
+        case Success(c) => checkCurrentPlayer(c._2, X)
+        case Failure(_) => fail()
+      }
 
-      val step7 = step6._2.move(step6._1)
-      checkCurrentPlayer(step7._2, O)
-
-      val step8 = step7._2.move(step7._1)
-      checkCurrentPlayer(step8._2, X)
-
-      val step9 = step8._2.move(step8._1)
-      checkCurrentPlayer(step9._2, O)
+      val step9 = step8.flatMap(f => f._2.move(f._1))
+      
+      step9 match {
+        case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(_) => fail()
+      }
     } catch {
       case is: IllegalStateException =>
     }
@@ -150,9 +211,12 @@ class GameControllerTest {
 
     val board5 = board4.get.update(Move(Cell(0, 2), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5.get)
+    val gameOverXWon = context.flatMap(f => f._2.move(board5.get))
 
-    assertEquals(XWon, gameOverXWon._2.status)
+    gameOverXWon match {
+      case Success(c) => assertEquals(XWon, c._2.status)
+      case Failure(_) => fail()
+    }
   }
 
   @Test
@@ -169,9 +233,12 @@ class GameControllerTest {
     val board4 = board3.get.update(Move(Cell(2, 2), playerTwo.playerType))
     val board5 = board4.get.update(Move(Cell(2, 0), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5.get)
+    val gameOverXWon = context.flatMap(f => f._2.move(board5.get))
 
-    assertEquals(XWon, gameOverXWon._2.status)
+    gameOverXWon match {
+      case Success(c) => assertEquals(XWon, c._2.status)
+      case Failure(_) => fail()
+    }
   }
 
   @Test
@@ -188,9 +255,12 @@ class GameControllerTest {
     val board4 = board3.get.update(Move(Cell(0, 1), playerTwo.playerType))
     val board5 = board4.get.update(Move(Cell(2, 2), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5.get)
+    val gameOverXWon = context.flatMap(f => f._2.move(board5.get))
 
-    assertEquals(XWon, gameOverXWon._2.status)
+    gameOverXWon match {
+      case Success(c) => assertEquals(XWon, c._2.status)
+      case Failure(_) => fail()
+    }
   }
 
   @Test
@@ -207,9 +277,12 @@ class GameControllerTest {
     val board4 = board3.get.update(Move(Cell(0, 1), playerTwo.playerType))
     val board5 = board4.get.update(Move(Cell(2, 0), playerOne.playerType))
 
-    val gameOverXWon = context._2.move(board5.get)
+    val gameOverXWon = context.flatMap(f => f._2.move(board5.get))
 
-    assertEquals(XWon, gameOverXWon._2.status)
+    gameOverXWon match {
+      case Success(c) => assertEquals(XWon, c._2.status)
+      case Failure(_) => fail()
+    }
   }
 
   @Test
@@ -230,8 +303,11 @@ class GameControllerTest {
     val board8 = board7.get.update(Move(Cell(2, 2), playerTwo.playerType))
     val board9 = board8.get.update(Move(Cell(2, 1), playerOne.playerType))
 
-    val tie = context._2.move(board9.get)
+    val tie = context.flatMap(f => f._2.move(board9.get))
 
-    assertEquals(Tie, tie._2.status)
+    tie match {
+      case Success(c) => assertEquals(Tie, c._2.status)
+      case Failure(_) => fail()
+    }
   }
 }

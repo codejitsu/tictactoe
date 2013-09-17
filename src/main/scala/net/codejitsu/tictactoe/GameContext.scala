@@ -1,9 +1,11 @@
 package net.codejitsu.tictactoe
 
 import scala.annotation.tailrec
-
 import GameStatus._
 import net.codejitsu.tictactoe.PlayerType._
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
 
 case class GameContext(val playerX: Player, val playerO: Player, val currentPlayer: PlayerType, val status: GameStatus,
     onError: Unit => Unit) {
@@ -15,48 +17,43 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   }
 
   @tailrec
-  private def safeMove(board: Board): Board = {
-    game.makeMove(currentPlayer, board) match {
-      case None => {
-        onError()
-        safeMove(board)
-      }
-      case Some(f) => f
+  private def safeMove(board: Board): Board = game.makeMove(currentPlayer, board) match {
+    case None => {
+      onError()
+      safeMove(board)
     }
+    case Some(f) => f
   }
 
-  def start: (Board, GameContext) = {
-    if (status != NotStarted) throw new IllegalStateException
-
-    this.copy(status = Playing, currentPlayer = currentPlayer).move(Board())
+  def start: Try[(Board, GameContext)] = {
+    if (status != NotStarted) Failure(new IllegalStateException)
+    else this.copy(status = Playing, currentPlayer = currentPlayer).move(Board())
   }
 
-  def move(board: Board): (Board, GameContext) = {
-    if (this.status == OWon || this.status == XWon || this.status == Tie) {
-      throw new IllegalStateException
-    }
+  def move(board: Board): Try[(Board, GameContext)] = {
+    if (this.status == OWon || this.status == XWon || this.status == Tie) Failure(new IllegalStateException)
+    else {
+      val gameStatus = game.calculateStatus(board)
 
-    val gameStatus = game.calculateStatus(board)
-
-    if (gameStatus != Playing) {
-      (board, this.copy(status = gameStatus))
-    } else {
-      try {
-        triggerMove(board, this)
-      } catch {
-        case goe: GameOverException => {
-          (board, this.copy(status = game.calculateStatus(board)))
+      if (gameStatus != Playing) {
+        Success((board, this.copy(status = gameStatus)))
+      } else {
+        try {
+          triggerMove(board, this)
+        } catch {
+          case goe: GameOverException => {
+            Success((board, this.copy(status = game.calculateStatus(board))))
+          }
         }
       }
     }
   }
 
-  private def triggerMove(board: Board, context: GameContext): (Board, GameContext) = {
-    if (context.status != Playing) throw new IllegalStateException
-    if (board.isFull) throw new GameOverException
-
-    (safeMove(board),
-      context.copy(status = Playing, currentPlayer = context.nextPlayer))
+  private def triggerMove(board: Board, context: GameContext): Try[(Board, GameContext)] = {
+    if (context.status != Playing) Failure(new IllegalStateException)
+    else if (board.isFull) Failure(new GameOverException)
+    else Success((safeMove(board),
+      context.copy(status = Playing, currentPlayer = context.nextPlayer)))
   }
   
   def statusString: String = status match {
