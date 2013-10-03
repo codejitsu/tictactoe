@@ -31,19 +31,18 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   }
 
   def move(board: Board): Try[(Board, GameContext)] = {
-    if (this.status == OWon || this.status == XWon || this.status == Tie) Failure(new IllegalStateException)
+    if (this.status == OWon || this.status == XWon || this.status == Tie) Failure(new GameOverException)
     else {
       val gameStatus = game.calculateStatus(board)
 
       if (gameStatus != Playing) {
         Success((board, this.copy(status = gameStatus)))
       } else {
-        try {
-          triggerMove(board, this)
-        } catch {
-          case goe: GameOverException => {
-            Success((board, this.copy(status = game.calculateStatus(board))))
-          }
+        val move = triggerMove(board, this)
+        move match {
+          case Success(_) => move
+          case Failure(e: GameOverException) => Success((board, this.copy(status = game.calculateStatus(board))))
+          case Failure(_) => move
         }
       }
     }

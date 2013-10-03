@@ -18,7 +18,7 @@ import net.codejitsu.tictactoe.PlayerType.X
 import net.codejitsu.tictactoe.RandomMoveStrategy
 import scala.util.Success
 import scala.util.Failure
-import scala.util.Failure
+import net.codejitsu.tictactoe.GameOverException
 
 class GameControllerTest {
   @Test def initGameController() {
@@ -161,6 +161,7 @@ class GameControllerTest {
       
       step6 match {
         case Success(c) => checkCurrentPlayer(c._2, X)
+        case Failure(g: GameOverException) => println("game over")
         case Failure(_) => fail()
       }
 
@@ -168,6 +169,7 @@ class GameControllerTest {
       
       step7 match {
         case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(g: GameOverException) => println("game over")
         case Failure(_) => fail()
       }
 
@@ -175,6 +177,7 @@ class GameControllerTest {
       
       step8 match {
         case Success(c) => checkCurrentPlayer(c._2, X)
+        case Failure(g: GameOverException) => println("game over")
         case Failure(_) => fail()
       }
 
@@ -182,6 +185,7 @@ class GameControllerTest {
       
       step9 match {
         case Success(c) => checkCurrentPlayer(c._2, O)
+        case Failure(g: GameOverException) => println("game over")
         case Failure(_) => fail()
       }
     } catch {
