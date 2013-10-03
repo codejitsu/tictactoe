@@ -13,7 +13,7 @@ object TicTacToeConsole extends App {
   val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
 
   val initContext = GameContext(playerOne, playerTwo, X, NotStarted,
-    _ => println("Error: Illegal move!\n")).start
+    g => if (g.currentPlayer == X) println("Error: Illegal move!\n")).start
 
   def play(board: Board, context: GameContext): Unit = {
     if (context.currentPlayer == playerOne.playerType) println(board.toString)

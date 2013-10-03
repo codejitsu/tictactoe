@@ -8,7 +8,7 @@ import scala.util.Failure
 import scala.util.Success
 
 case class GameContext(val playerX: Player, val playerO: Player, val currentPlayer: PlayerType, val status: GameStatus,
-    onError: Unit => Unit) {
+    onError: GameContext => Unit) {
   val game = Game(playerX, playerO)
 
   def nextPlayer = currentPlayer match {
@@ -19,7 +19,7 @@ case class GameContext(val playerX: Player, val playerO: Player, val currentPlay
   @tailrec
   private def safeMove(board: Board): Board = game.makeMove(currentPlayer, board) match {
     case None => {
-      onError()
+      onError(this)
       safeMove(board)
     }
     case Some(f) => f
