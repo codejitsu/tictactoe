@@ -4,12 +4,12 @@ import net.codejitsu.tictactoe.Board
 import net.codejitsu.tictactoe.PlayerType._
 import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.Move
-import net.codejitsu.tictactoe.RandomMoveStrategy
 import net.codejitsu.tictactoe.PlayerType
 import net.codejitsu.tictactoe.Game
 import net.codejitsu.tictactoe.GameStatus
 import net.codejitsu.tictactoe.GameStatus._
 import net.codejitsu.tictactoe.Cell
+import net.codejitsu.tictactoe.PlayStrategy._
 
 object MoveTree {
   import scala.annotation.tailrec
@@ -24,8 +24,8 @@ object MoveTree {
       Cell(1, 0), Cell(1, 1), Cell(1, 2), 
       Cell(2, 0), Cell(2, 1), Cell(2, 2))
   
-  private val game = Game(Player("X", X, new RandomMoveStrategy),
-    Player("O", O, new RandomMoveStrategy))  
+  private val game = Game(Player("X", X, random),
+    Player("O", O, random))  
   
   private lazy val tree = build()  
     
@@ -123,7 +123,7 @@ object MoveTree {
     case Nil => all
     case x :: xn => {
       if (!all.contains(x._1)) {
-        lazy val p = Player("Player", x._2, new RandomMoveStrategy())
+        lazy val p = Player("Player", x._2, random)
 
         lazy val nextFields = collect(x._1, p, Nil, possibleMoves)
 
@@ -141,7 +141,7 @@ object MoveTree {
   }
   
   def build(player: PlayerType = PlayerType.X, cells: List[Cell] = this.cells) = {
-    val p = Player("Player", player, new RandomMoveStrategy())
+    val p = Player("Player", player, random)
     val firstLevel = MoveTree.collect(Board(), p, Nil, cells)    
 	val allLevels = MoveTree.collectAll(List((Board(), player)), cells, Map.empty)
     

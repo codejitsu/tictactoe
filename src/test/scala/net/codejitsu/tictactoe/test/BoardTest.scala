@@ -11,7 +11,7 @@ import net.codejitsu.tictactoe.Move
 import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.X
-import net.codejitsu.tictactoe.RandomMoveStrategy
+import net.codejitsu.tictactoe.PlayStrategy._
 
 class BoardTest {
 	@Test def initialFieldIsEmpty() {
@@ -80,7 +80,7 @@ class BoardTest {
 	
 	@Test (expected = classOf[IllegalArgumentException]) 
 	def testInvalidRow() {
-	  	val player = Player("Player 1", X, new RandomMoveStrategy())
+	  	val player = Player("Player 1", X, random)
 	  	
 	  	val board = Board()
 
@@ -89,7 +89,7 @@ class BoardTest {
 
 	@Test (expected = classOf[IllegalArgumentException]) 
 	def testNegativeRow() {
-	  	val player = Player("Player 1", X, new RandomMoveStrategy())
+	  	val player = Player("Player 1", X, random)
 	  	
 	  	val board = Board()
 
@@ -98,7 +98,7 @@ class BoardTest {
 	
 	@Test (expected = classOf[IllegalArgumentException]) 
 	def testInvalidColumn() {
-	  	val player = Player("Player 1", X, new RandomMoveStrategy())
+	  	val player = Player("Player 1", X, random)
 	  	
 	  	val board = Board()
 
@@ -107,7 +107,7 @@ class BoardTest {
 
 	@Test (expected = classOf[IllegalArgumentException]) 
 	def testNegativeColumn() {
-	  	val player = Player("Player 1", X, new RandomMoveStrategy())
+	  	val player = Player("Player 1", X, random)
 	  	
 	  	val board = Board()
 

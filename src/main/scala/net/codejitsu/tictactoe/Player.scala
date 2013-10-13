@@ -6,13 +6,13 @@ object PlayerType extends Enumeration {
 }
 import PlayerType._
 
-case class Player(val name: String, val playerType: PlayerType, val strategy: PlayStrategy) {
+case class Player(val name: String, val playerType: PlayerType, val strategy: PlayStrategy.StrategyFun) {
 	require(name != null)
 	require(!name.trim().isEmpty())
 	require(playerType != null)
 	require(strategy != null)
 	
 	def makeMove(board: Board): Move = {
-	  strategy.makeMove(board, this)
+	  strategy(board, this)
 	}
 }

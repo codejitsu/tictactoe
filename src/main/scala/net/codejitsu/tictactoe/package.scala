@@ -1,5 +1,5 @@
 package net.codejitsu
 
 package object tictactoe {
-	val FieldSize = 3
+  val FieldSize = 3
 }

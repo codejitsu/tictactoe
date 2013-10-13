@@ -15,15 +15,15 @@ import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.PlayerType.O
 import net.codejitsu.tictactoe.PlayerType.PlayerType
 import net.codejitsu.tictactoe.PlayerType.X
-import net.codejitsu.tictactoe.RandomMoveStrategy
+import net.codejitsu.tictactoe.PlayStrategy._
 import scala.util.Success
 import scala.util.Failure
 import net.codejitsu.tictactoe.GameOverException
 
 class GameControllerTest {
   @Test def initGameController() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ())
 
@@ -44,8 +44,8 @@ class GameControllerTest {
 
   @Test
   def startCalledTwiceResultsInExceptions() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ())
 
@@ -63,8 +63,8 @@ class GameControllerTest {
 
   @Test
   def atTheEndTheFieldIsFullIfTie() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
@@ -96,13 +96,13 @@ class GameControllerTest {
 
   @Test(expected = classOf[ArithmeticException])
   def onErrorCalled() {
-    val playerOne = Player("Player 1", X, new PlayStrategy {
-      def makeMove(field: Board, player: Player): Move = Move(Cell(0, 0), player.playerType)
-    })
+    val strategy: PlayStrategy.StrategyFun = (board, player) => {
+     Move(Cell(0, 0), player.playerType) 
+    }
     
-    val playerTwo = Player("Player 2", O, new PlayStrategy {
-      def makeMove(field: Board, player: Player): Move = Move(Cell(0, 0), player.playerType)
-    })
+    val playerOne = Player("Player 1", X, strategy)
+    
+    val playerTwo = Player("Player 2", O, strategy)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => throw new ArithmeticException).start
     
@@ -114,8 +114,8 @@ class GameControllerTest {
   
   @Test
   def playersSwitchedCorrectly() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ())
 
@@ -198,8 +198,8 @@ class GameControllerTest {
 
   @Test
   def playerXWonHorizontally() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
@@ -225,8 +225,8 @@ class GameControllerTest {
 
   @Test
   def playerXWonVertically() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
@@ -247,8 +247,8 @@ class GameControllerTest {
 
   @Test
   def playerXWonDiagonal1() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
@@ -269,8 +269,8 @@ class GameControllerTest {
 
   @Test
   def playerXWonDiagonal2() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 
@@ -291,8 +291,8 @@ class GameControllerTest {
 
   @Test
   def tie() {
-    val playerOne = Player("Player 1", X, new RandomMoveStrategy())
-    val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+    val playerOne = Player("Player 1", X, random)
+    val playerTwo = Player("Player 2", O, random)
 
     val context = GameContext(playerOne, playerTwo, X, NotStarted, _ => ()).start
 

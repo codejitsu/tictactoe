@@ -1,16 +1,15 @@
 import net.codejitsu.tictactoe.Player
 import net.codejitsu.tictactoe.PlayerType._
-import net.codejitsu.tictactoe.RandomMoveStrategy
 import net.codejitsu.tictactoe.GameContext
 import net.codejitsu.tictactoe.GameStatus._
-import net.codejitsu.tictactoe.ReadConsoleStrategy
+import net.codejitsu.tictactoe.PlayStrategy._
 import net.codejitsu.tictactoe.Board
 import scala.util.Failure
 import scala.util.Success
 
 object TicTacToeConsole extends App {
-  val playerOne = Player("Player 1", X, new ReadConsoleStrategy())
-  val playerTwo = Player("Player 2", O, new RandomMoveStrategy())
+  val playerOne = Player("Player 1", X, readConsole)
+  val playerTwo = Player("Player 2", O, random)
 
   val initContext = GameContext(playerOne, playerTwo, X, NotStarted,
     g => if (g.currentPlayer == X) println("Error: Illegal move!\n")).start

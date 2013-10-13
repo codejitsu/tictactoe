@@ -8,51 +8,51 @@ import net.codejitsu.tictactoe.tree.Tree
 import net.codejitsu.tictactoe.tree.MoveTree.Step
 import net.codejitsu.tictactoe.tree.MoveTree
 
-trait PlayStrategy {
-  def makeMove(board: Board, player: Player): Move
-}
+object PlayStrategy {
+  type StrategyFun = (Board, Player) => Move
 
-class RandomMoveStrategy extends PlayStrategy {
-  private val rand = new Random()
-  def makeMove(field: Board, player: Player) = 
-    Move(Cell(this.rand.nextInt(FieldSize), this.rand.nextInt(FieldSize)), player.playerType)
-}
+  val random: StrategyFun = (board, player) => {
+    val rand = new Random()
+    Move(Cell(rand.nextInt(FieldSize), rand.nextInt(FieldSize)), player.playerType)
+  }
 
-class ReadConsoleStrategy extends PlayStrategy {
-  @tailrec
-  final def makeMove(board: Board, player: Player): Move = {
-    print(player.playerType + ": ")
-
-    val input = readLine()
-
-    println()
-
-    if (!verifyInput(input)) {
-      println("Invalid input.")
-      makeMove(board, player)
-    } else {
-      val coordinates = parseCoordinates(input)
-      Move(Cell(coordinates._1, coordinates._2), player.playerType)
+  val readConsole: StrategyFun = (board, player) => {
+    def verifyInput(input: String): Boolean = {
+      if (input == null) false
+      else if (!input.contains(",")) false
+      else if (!input.forall(c => c.isDigit || c == ',')) false
+      else if (input.count(c => c == ',') > 1) false
+      else if (!input.split(",").map(_.toInt).forall(c => c >= 0 && c < FieldSize)) false
+      else true
     }
+
+    def parseCoordinates(input: String): (Int, Int) = {
+      val coords = input.split(",").map(_.toInt)
+      (coords(0), coords(1))
+    }
+
+    def makeMove(board: Board, player: Player): Move = {
+      print(player.playerType + ": ")
+
+      val input = readLine()
+
+      println()
+
+      if (!verifyInput(input)) {
+        println("Invalid input.")
+        makeMove(board, player)
+      } else {
+        val coordinates = parseCoordinates(input)
+        Move(Cell(coordinates._1, coordinates._2), player.playerType)
+      }
+    }
+
+    makeMove(board, player)
   }
-
-  private def verifyInput(input: String): Boolean = {
-    if (input == null) false
-    else if (!input.contains(",")) false
-    else if (!input.forall(c => c.isDigit || c == ',')) false
-    else if (input.count(c => c == ',') > 1) false
-    else if (!input.split(",").map(_.toInt).forall(c => c >= 0 && c < FieldSize)) false
-    else true
+  
+  val god: StrategyFun = (board, player) => {
+    lazy val gameTree: Tree[Step] = MoveTree.build(PlayerType.X)
+    
+    Move(Cell(0, 0), player.playerType)
   }
-
-  private def parseCoordinates(input: String): (Int, Int) = {
-    val coords = input.split(",").map(_.toInt)
-    (coords(0), coords(1))
-  }
-}
-
-class GodStrategy extends PlayStrategy {
-  private lazy val gameTree: Tree[Step] = MoveTree.build(X)
-
-  def makeMove(field: Board, player: Player) = Move(Cell(0, 0), player.playerType)
 }
